@@ -3,6 +3,8 @@ out
 target
 *.iml
 log
+.patch
 
 
 
+/Prepare_to_HW0.patch
