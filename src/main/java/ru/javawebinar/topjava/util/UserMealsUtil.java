@@ -40,17 +40,9 @@ public class UserMealsUtil {
                 .map(userMeal -> new UserMealWithExceed(
                         userMeal.getDateTime(),
                         userMeal.getDescription(),
-                        userMeal.getCalories(), false))
-                .map(userMealWithExceed -> setExceed(userMealWithExceed, mealPerDayMap, caloriesPerDay))
+                        userMeal.getCalories(),
+                        mealPerDayMap.get(userMeal.getDateTime().toLocalDate()) > caloriesPerDay))
                 .collect(Collectors.toList());
-    }
-
-    private static UserMealWithExceed setExceed(
-            UserMealWithExceed userMealWithExceed, Map<LocalDate, Integer> mealPerDayMap, int caloriesPerDay) {
-        if (mealPerDayMap.get(userMealWithExceed.getDateTime().toLocalDate()) > caloriesPerDay) {
-            userMealWithExceed.setExceed(true);
-        }
-        return userMealWithExceed;
     }
 
     public static List<UserMealWithExceed> getFilteredWithExceeded(
@@ -64,10 +56,8 @@ public class UserMealsUtil {
         for (UserMeal userMeal : mealList) {
             if (TimeUtil.isBetween(userMeal.getDateTime().toLocalTime(), startTime, endTime)) {
                 UserMealWithExceed userMealWithExceed = new UserMealWithExceed(
-                        userMeal.getDateTime(), userMeal.getDescription(), userMeal.getCalories(), false);
-                if (mealPerDayMap.get(userMeal.getDateTime().toLocalDate()) > caloriesPerDay) {
-                    userMealWithExceed.setExceed(true);
-                }
+                        userMeal.getDateTime(), userMeal.getDescription(), userMeal.getCalories(),
+                        mealPerDayMap.get(userMeal.getDateTime().toLocalDate()) > caloriesPerDay);
                 mealWithExceedList.add(userMealWithExceed);
             }
         }
