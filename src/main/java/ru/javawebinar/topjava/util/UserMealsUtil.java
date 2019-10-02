@@ -28,6 +28,8 @@ public class UserMealsUtil {
                 getFilteredWithExceeded(mealList, LocalTime.of(7, 0), LocalTime.of(12, 0), 2000);
         List<UserMealWithExceed> mealWithExceedListFromStreams =
                 getStreamFilteredWithExceeded(mealList, LocalTime.of(7, 0), LocalTime.of(12, 0), 2000);
+        List<UserMealWithExceed> mealWithExceedListOnePass =
+                getFilteredWithExceededOnePass(mealList, LocalTime.of(7, 0), LocalTime.of(12, 0), 2000);
     }
 
     public static List<UserMealWithExceed> getStreamFilteredWithExceeded(
@@ -60,6 +62,29 @@ public class UserMealsUtil {
                         mealPerDayMap.get(userMeal.getDateTime().toLocalDate()) > caloriesPerDay);
                 mealWithExceedList.add(userMealWithExceed);
             }
+        }
+        return mealWithExceedList;
+    }
+
+    public static List<UserMealWithExceed> getFilteredWithExceededOnePass(
+            List<UserMeal> mealList, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
+        Map<LocalDate, Integer> caloriesPerDayMap = new HashMap<>();
+        Map<LocalDateTime, UserMeal> timeFilteredMap = new HashMap<>();
+        for (UserMeal userMeal : mealList) {
+            caloriesPerDayMap.merge(userMeal.getDateTime().toLocalDate(), userMeal.getCalories(), Integer::sum);
+            final LocalDateTime ldt = userMeal.getDateTime();
+            if (TimeUtil.isBetween(ldt.toLocalTime(), startTime, endTime)) {
+                timeFilteredMap.put(ldt, userMeal);
+            }
+        }
+
+        List<UserMealWithExceed> mealWithExceedList = new ArrayList<>();
+        for (LocalDateTime ldt : timeFilteredMap.keySet()) {
+            final UserMeal userMeal = timeFilteredMap.get(ldt);
+            UserMealWithExceed userMealWithExceed = new UserMealWithExceed(
+                    ldt, userMeal.getDescription(), userMeal.getCalories(),
+                    caloriesPerDayMap.get(ldt.toLocalDate()) > caloriesPerDay);
+            mealWithExceedList.add(userMealWithExceed);
         }
         return mealWithExceedList;
     }
