@@ -1,6 +1,7 @@
 package ru.javawebinar.topjava.model;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 public class MealTo {
     private final LocalDateTime dateTime;
@@ -9,9 +10,23 @@ public class MealTo {
 
     private final int calories;
 
-//    private final Supplier<Boolean> excess;
+    private final int id;
+
+
 //    private final AtomicBoolean excess;
+//    private final Supplier<Boolean> excess;
+
     private final boolean excess;
+
+    public MealTo(LocalDateTime dateTime, String description, int calories, boolean excess, int id) {
+        Objects.requireNonNull(dateTime, "dateTime can't be null");
+        Objects.requireNonNull(description, "description can't be null");
+        this.dateTime = dateTime;
+        this.description = description;
+        this.calories = calories;
+        this.excess = excess;
+        this.id = id;
+    }
 
     public LocalDateTime getDateTime() {
         return dateTime;
@@ -29,13 +44,9 @@ public class MealTo {
         return excess;
     }
 
-    public MealTo(LocalDateTime dateTime, String description, int calories, boolean excess) {
-        this.dateTime = dateTime;
-        this.description = description;
-        this.calories = calories;
-        this.excess = excess;
+    public int getId() {
+        return id;
     }
-
 
     @Override
     public String toString() {
