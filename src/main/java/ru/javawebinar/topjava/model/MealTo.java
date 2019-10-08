@@ -12,10 +12,6 @@ public class MealTo {
 
     private final int id;
 
-
-//    private final AtomicBoolean excess;
-//    private final Supplier<Boolean> excess;
-
     private final boolean excess;
 
     public MealTo(LocalDateTime dateTime, String description, int calories, boolean excess, int id) {

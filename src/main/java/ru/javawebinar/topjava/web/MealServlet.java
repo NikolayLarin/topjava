@@ -14,25 +14,30 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class MealServlet extends HttpServlet {
     private static final Logger log = getLogger(MealServlet.class);
 
-    private static Storage storage = new MealsConcurrentMapStorage();
+    private final Storage storage = new MealsConcurrentMapStorage();
+
+    {
+        MealsUtil.MEAL_LIST.forEach(storage::save);
+    }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws javax.servlet.ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
-        int id = Integer.parseInt(request.getParameter("id"));
-        String description = request.getParameter("description");
-        if (!description.trim().isEmpty() && id == -1) {
-            storage.save(create(description, id, request));
-        } else if (!description.trim().isEmpty()) {
-            storage.update(create(description, id, request));
+        int id = getId(request);
+        Meal meal = new Meal(LocalDateTime.parse(
+                request.getParameter("dateTime"), MealsUtil.FORMATTER),
+                request.getParameter("description"),
+                Integer.parseInt((request.getParameter("calories"))), id);
+        if (id == -1) {
+            storage.save(meal);
+        } else {
+            storage.update(meal);
         }
         response.sendRedirect("meals");
     }
@@ -40,63 +45,45 @@ public class MealServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         log.debug("redirect to meals");
-        String action = request.getParameter("action");
-        if (action == null) {
-            List<MealTo> mealTos;
-            if (storage.size() == 0) {
-                storage.clear();
-                List<Meal> meals = MealsUtil.MEAL_LIST.stream()
-                        .map(this::save)
-                        .collect(Collectors.toList());
-                mealTos = getTos(meals);
-            } else {
-                mealTos = getTos(storage.getAll());
-            }
-            forward(mealTos, request, response);
-            return;
-        }
-
-        int id = Integer.parseInt(request.getParameter("id"));
+        String s = request.getParameter("action");
+        String action = (s != null) ? s : "";
         switch (action) {
             case "delete":
-                storage.delete(id);
+                storage.delete(getId(request));
                 response.sendRedirect("meals");
                 break;
             case "edit":
+                int id = getId(request);
                 request.setAttribute("id", id);
-                forward(request, response);
+                Meal meal = storage.get(id);
+                request.setAttribute("mealTo", new MealTo(
+                        meal.getDateTime(), meal.getDescription(),
+                        meal.getCalories(), false, meal.getId()));
+                forward("mealsEdit.jsp", request, response);
                 break;
             case "add":
                 request.setAttribute("id", -1);
-                forward(request, response);
+                request.setAttribute("mealTo", new MealTo(
+                        LocalDateTime.of(1, 1, 1, 0, 1),
+                        "", 0, false, -1));
+                forward("mealsEdit.jsp", request, response);
+                break;
+            default:
+                request.setAttribute("meals", MealsUtil.getFiltered(
+                        storage.getAll(), LocalTime.MIN, LocalTime.MAX,
+                        MealsUtil.DEFAULT_CALORIES_PER_DAY));
+                forward("mealsView.jsp", request, response);
                 break;
         }
+
     }
 
-    private Meal save(Meal meal) {
-        storage.save(meal);
-        return storage.get(meal.getId());
+    private int getId(HttpServletRequest request) {
+        return Integer.parseInt(request.getParameter("id"));
     }
 
-    private void forward(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.setAttribute("meals", getTos(storage.getAll()));
+    private void forward(String jsp, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setAttribute("formatter", MealsUtil.FORMATTER);
-        request.getRequestDispatcher("mealsEdit.jsp").forward(request, response);
-    }
-
-    private void forward(List<MealTo> mealTos, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.setAttribute("meals", mealTos);
-        request.setAttribute("formatter", MealsUtil.FORMATTER);
-        request.getRequestDispatcher("mealsView.jsp").forward(request, response);
-    }
-
-    private List<MealTo> getTos(List<Meal> meals) {
-        return MealsUtil.getFiltered(
-                meals, LocalTime.MIN, LocalTime.MAX, MealsUtil.DEFAULT_CALORIES_PER_DAY);
-    }
-
-    private Meal create(String description, int id, HttpServletRequest request) {
-        return new Meal(LocalDateTime.parse(request.getParameter("dateTime"), MealsUtil.FORMATTER),
-                description, Integer.parseInt((request.getParameter("calories"))), id);
+        request.getRequestDispatcher(jsp).forward(request, response);
     }
 }

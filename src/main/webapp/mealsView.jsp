@@ -12,6 +12,7 @@
 <h3><a href="index.html">Home</a></h3>
 <hr>
 <h2>Meals List</h2>
+<h4><a href="meals?id=${-1}&action=add">add meal</a></h4>
 <table>
     <tr>
         <th hidden>Id</th>
@@ -26,15 +27,15 @@
         <jsp:useBean id="mealTo" type="ru.javawebinar.topjava.model.MealTo"/>
         <tr style="${style}">
             <td hidden><c:out value="${mealTo.id}"/></td>
-            <td width="120"><c:out value="${mealTo.dateTime.format(formatter)}"/></td>
-            <td width="50"><c:out value="${mealTo.description}"/></td>
-            <td width="50"><c:out value="${mealTo.calories}"/></td>
-            <td width="30"><a href="meals?id=${mealTo.id}&action=edit">edit</a></td>
-            <td width="30"><a href="meals?id=${mealTo.id}&action=delete">delete</a></td>
+            <td><c:out value="${mealTo.dateTime.format(formatter)}"/></td>
+            <td><c:out value="${mealTo.description}"/></td>
+            <td><c:out value="${mealTo.calories}"/></td>
+            <td><a href="meals?id=${mealTo.id}&action=edit">edit</a></td>
+            <td><a href="meals?id=${mealTo.id}&action=delete">delete</a></td>
         </tr>
     </c:forEach>
 </table>
 <br/>
-<a href="meals?id=${-1}&action=add">add meal</a>
+<%--<a href="meals?id=${-1}&action=add">add meal</a>--%>
 </body>
 </html>

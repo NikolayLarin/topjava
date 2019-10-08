@@ -13,17 +13,6 @@ public class MealsConcurrentMapStorage implements Storage {
     private final AtomicInteger atomicCounter = new AtomicInteger();
 
     @Override
-    public void clear() {
-        map.clear();
-        atomicCounter.set(0);
-    }
-
-    @Override
-    public void update(Meal meal) {
-        map.put(meal.getId(), meal);
-    }
-
-    @Override
     public void save(Meal meal) {
         meal.setId(atomicCounter.incrementAndGet());
         map.put(meal.getId(), meal);
@@ -36,8 +25,8 @@ public class MealsConcurrentMapStorage implements Storage {
     }
 
     @Override
-    public List<Meal> getAll() {
-        return new ArrayList<>(map.values());
+    public void update(Meal meal) {
+        map.put(meal.getId(), meal);
     }
 
     @Override
@@ -46,7 +35,7 @@ public class MealsConcurrentMapStorage implements Storage {
     }
 
     @Override
-    public int size() {
-        return map.size();
+    public List<Meal> getAll() {
+        return new ArrayList<>(map.values());
     }
 }
