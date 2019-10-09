@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import ru.javawebinar.topjava.Storage.MealsConcurrentMapStorage;
 import ru.javawebinar.topjava.Storage.Storage;
 import ru.javawebinar.topjava.model.Meal;
-import ru.javawebinar.topjava.model.MealTo;
 import ru.javawebinar.topjava.util.MealsUtil;
 
 import javax.servlet.ServletException;
@@ -55,17 +54,14 @@ public class MealServlet extends HttpServlet {
             case "edit":
                 int id = getId(request);
                 request.setAttribute("id", id);
-                Meal meal = storage.get(id);
-                request.setAttribute("mealTo", new MealTo(
-                        meal.getDateTime(), meal.getDescription(),
-                        meal.getCalories(), false, meal.getId()));
+                request.setAttribute("meal", storage.get(id));
                 forward("mealsEdit.jsp", request, response);
                 break;
             case "add":
                 request.setAttribute("id", -1);
-                request.setAttribute("mealTo", new MealTo(
+                request.setAttribute("meal", new Meal(
                         LocalDateTime.of(1, 1, 1, 0, 1),
-                        "", 0, false, -1));
+                        "", 0));
                 forward("mealsEdit.jsp", request, response);
                 break;
             default:

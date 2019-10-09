@@ -4,7 +4,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
     <link rel="stylesheet" href="css/style.css">
-    <jsp:useBean id="mealTo" scope="request" type="ru.javawebinar.topjava.model.MealTo"/>
+    <jsp:useBean id="meal" scope="request" type="ru.javawebinar.topjava.model.Meal"/>
     <jsp:useBean id="formatter" scope="request" type="java.time.format.DateTimeFormatter"/>
     <jsp:useBean id="id" scope="request" type="java.lang.Integer"/>
     <title>Meals</title>
@@ -23,13 +23,13 @@
         </tr>
         <tr>
             <td hidden><input style="text-align: center"
-                              type="text" name="id" value="${mealTo.id}"></td>
+                              type="text" name="id" value="${meal.id}"></td>
             <td><input style="text-align: center"
-                       type="text" name="dateTime" value="${mealTo.dateTime.format(formatter)}"></td>
+                       type="text" name="dateTime" value="${meal.dateTime.format(formatter)}"></td>
             <td><input style="text-align: center"
-                       type="text" name="description" value="${mealTo.description}"></td>
+                       type="text" name="description" value="${meal.description}"></td>
             <td><input style="text-align: center"
-                       type="text" name="calories" value="${mealTo.calories}"></td>
+                       type="text" name="calories" value="${meal.calories}"></td>
         </tr>
     </table>
     <br/>
