@@ -1,3 +1,4 @@
+<%@ page import="ru.javawebinar.topjava.web.SecurityUtil" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
@@ -21,8 +22,23 @@
     <h3><a href="index.html">Home</a></h3>
     <hr/>
     <h2>Meals</h2>
+    <h3>Now active user with id =
+        <c:out value="<%=SecurityUtil.authUserId()%>"/></h3>
     <a href="meals?action=create">Add Meal</a>
     <br><br>
+    <form method="get" action="meals">
+        <jsp:useBean id="filters" type="java.util.concurrent.ConcurrentHashMap" scope="request"/>
+        <p>Введите даты начала и окончания выборки</p>
+        <input type="date" name="startDate" value='${filters.get("startDate")}'>
+        <input type="date" name="endDate" value='${filters.get("endDate")}'>
+        <br/><br/>
+        <p>Введите время начала и окончания выборки</p>
+        <input type="time" name="startTime" value='${filters.get("startTime")}'>
+        <input type="time" name="endTime" value='${filters.get("endTime")}'>
+        <br/><br/>
+        <input type="submit" value="Отфильтровать">
+        <br/><br/><br/>
+    </form>
     <table border="1" cellpadding="8" cellspacing="0">
         <thead>
         <tr>
@@ -34,7 +50,7 @@
         </tr>
         </thead>
         <c:forEach items="${meals}" var="meal">
-            <jsp:useBean id="meal" type="ru.javawebinar.topjava.model.MealTo"/>
+            <jsp:useBean id="meal" type="ru.javawebinar.topjava.to.MealTo"/>
             <tr class="${meal.excess ? 'excess' : 'normal'}">
                 <td>
                         <%--${meal.dateTime.toLocalDate()} ${meal.dateTime.toLocalTime()}--%>
