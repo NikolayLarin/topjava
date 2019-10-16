@@ -20,7 +20,7 @@ public class SpringMain {
             System.out.println("_______________________________");
             MealRestController mealRestController = appCtx.getBean(MealRestController.class);
             System.out.println("\nAll meals for user" +
-                    mealRestController.getAllByUser());
+                    mealRestController.getAll());
         }
     }
 }

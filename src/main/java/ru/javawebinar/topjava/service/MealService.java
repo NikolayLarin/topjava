@@ -37,15 +37,11 @@ public class MealService {
         return checkNotFoundWithId(repository.get(id, userId), id);
     }
 
-    public List<Meal> getAll() {
-        return (List<Meal>) repository.getAll();
+    public List<Meal> getAll(int userId) {
+        return repository.getAll(userId);
     }
 
-    public List<Meal> getAllByUser(int userId) {
-        return (List<Meal>) repository.getAllByUser(userId);
-    }
-
-    public List<Meal> getAllByUserByDates(int userId, LocalDate startDate, LocalDate endDate) {
-        return (List<Meal>) repository.getAllByUserByDates(userId, startDate, endDate);
+    public List<Meal> getAllByDates(int userId, LocalDate startDate, LocalDate endDate) {
+        return repository.getAllByDates(userId, startDate, endDate);
     }
 }

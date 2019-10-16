@@ -19,6 +19,7 @@
 </head>
 <body>
 <section>
+
     <h3><a href="index.html">Home</a></h3>
     <hr/>
     <h2>Meals</h2>
@@ -26,19 +27,25 @@
         <c:out value="<%=SecurityUtil.authUserId()%>"/></h3>
     <a href="meals?action=create">Add Meal</a>
     <br><br>
-    <form method="get" action="meals">
-        <jsp:useBean id="filters" type="java.util.concurrent.ConcurrentHashMap" scope="request"/>
+
+    <form action="meals">
         <p>Введите даты начала и окончания выборки</p>
-        <input type="date" name="startDate" value='${filters.get("startDate")}'>
-        <input type="date" name="endDate" value='${filters.get("endDate")}'>
+        <input type="date" name="startDate" value='${param.get("startDate")}'>
+        <input type="date" name="endDate" value='${param.get("endDate")}'>
         <br/><br/>
         <p>Введите время начала и окончания выборки</p>
-        <input type="time" name="startTime" value='${filters.get("startTime")}'>
-        <input type="time" name="endTime" value='${filters.get("endTime")}'>
+        <input type="time" name="startTime" value='${param.get("startTime")}'>
+        <input type="time" name="endTime" value='${param.get("endTime")}'>
         <br/><br/>
         <input type="submit" value="Отфильтровать">
-        <br/><br/><br/>
+        <br/>
     </form>
+
+    <form action="meals">
+        <input type="submit" value="Сбросить фильтры">
+        <br/><br/>
+    </form>
+
     <table border="1" cellpadding="8" cellspacing="0">
         <thead>
         <tr>
@@ -49,6 +56,7 @@
             <th></th>
         </tr>
         </thead>
+        <jsp:useBean id="meals" scope="request" type="java.util.List"/>
         <c:forEach items="${meals}" var="meal">
             <jsp:useBean id="meal" type="ru.javawebinar.topjava.to.MealTo"/>
             <tr class="${meal.excess ? 'excess' : 'normal'}">
@@ -65,6 +73,7 @@
             </tr>
         </c:forEach>
     </table>
+
 </section>
 </body>
 </html>

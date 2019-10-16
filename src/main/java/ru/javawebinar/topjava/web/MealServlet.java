@@ -15,22 +15,25 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
+
+import static ru.javawebinar.topjava.util.DateTimeUtil.DateTypeUtil.END_DATE;
+import static ru.javawebinar.topjava.util.DateTimeUtil.DateTypeUtil.START_DATE;
+import static ru.javawebinar.topjava.util.DateTimeUtil.TimeTypeUtil.END_TIME;
+import static ru.javawebinar.topjava.util.DateTimeUtil.TimeTypeUtil.START_TIME;
+import static ru.javawebinar.topjava.util.DateTimeUtil.parse;
 
 public class MealServlet extends HttpServlet {
     private static final Logger log = LoggerFactory.getLogger(MealServlet.class);
 
-    private MealRestController mealRestController;
+    private ConfigurableApplicationContext appCtx =
+            new ClassPathXmlApplicationContext("spring/spring-app.xml");
+    private MealRestController mealRestController =
+            appCtx.getBean(MealRestController.class);
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        try (ConfigurableApplicationContext appCtx =
-                     new ClassPathXmlApplicationContext("spring/spring-app.xml")) {
-            mealRestController = appCtx.getBean(MealRestController.class);
-        }
     }
 
     @Override
@@ -52,13 +55,14 @@ public class MealServlet extends HttpServlet {
         if (meal.isNew()) {
             mealRestController.create(meal);
         } else {
-            mealRestController.update(meal, meal.getId());
+            mealRestController.update(meal);
         }
         response.sendRedirect("meals");
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
         String action = request.getParameter("action");
 
         switch (action == null ? "all" : action) {
@@ -76,22 +80,21 @@ public class MealServlet extends HttpServlet {
                 request.setAttribute("meal", meal);
                 request.getRequestDispatcher("/mealForm.jsp").forward(request, response);
                 break;
-            case "all":
             default:
-                log.info("getAll");
-                final String sd = setValue(request.getParameter("startDate"));
-                final String ed = setValue(request.getParameter("endDate"));
-                final String st = setValue(request.getParameter("startTime"));
-                final String et = setValue(request.getParameter("endTime"));
-                request.setAttribute("meals", mealRestController.getAllByUserDatesAndTime(sd, ed, st, et));
-                Map<String, String> filters = new ConcurrentHashMap<>();
-                filters.put("startDate", sd);
-                filters.put("endDate", ed);
-                filters.put("startTime", st);
-                filters.put("endTime", et);
-                request.setAttribute("filters", filters);
+                final String sd = setValue("startDate", request);
+                final String ed = setValue("endDate", request);
+                final String st = setValue("startTime", request);
+                final String et = setValue("endTime", request);
+                if ((sd.trim() + ed.trim() + st.trim() + et.trim()).isEmpty()) {
+                    log.info("getAll");
+                    request.setAttribute("meals", mealRestController.getAll());
+                } else {
+                    log.info("getAllFiltered");
+                    request.setAttribute("meals", mealRestController.getAllFiltered(
+                            parse(sd, START_DATE), parse(ed, END_DATE),
+                            parse(st, START_TIME), parse(et, END_TIME)));
+                }
                 request.getRequestDispatcher("/meals.jsp").forward(request, response);
-                break;
         }
     }
 
@@ -100,7 +103,8 @@ public class MealServlet extends HttpServlet {
         return Integer.parseInt(paramId);
     }
 
-    private String setValue(String s) {
-        return s != null ? s : "";
+    private String setValue(String name, HttpServletRequest request) {
+        String value = request.getParameter(name);
+        return value != null ? value : "";
     }
 }

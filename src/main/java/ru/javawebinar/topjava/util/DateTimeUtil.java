@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 
 public class DateTimeUtil {
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -25,7 +27,7 @@ public class DateTimeUtil {
             case END_DATE:
                 return isEmpty(ld) ? LocalDate.MAX : ldParse(ld);
         }
-        return null;
+        return LocalDate.now();
     }
 
     public static LocalTime parse(String lt, TimeTypeUtil type) {
@@ -35,7 +37,7 @@ public class DateTimeUtil {
             case END_TIME:
                 return isEmpty(lt) ? LocalTime.MAX : ltParse(lt);
         }
-        return null;
+        return LocalTime.now().truncatedTo(ChronoUnit.MINUTES);
     }
 
     private static boolean isEmpty(String s) {
@@ -43,11 +45,19 @@ public class DateTimeUtil {
     }
 
     private static LocalDate ldParse(String ld) {
-        return LocalDate.parse(ld, DATE_FORMATTER);
+        try {
+            return LocalDate.parse(ld, DATE_FORMATTER);
+        } catch (DateTimeParseException e) {
+            return LocalDate.now();
+        }
     }
 
     private static LocalTime ltParse(String lt) {
-        return LocalTime.parse(lt, TIME_FORMATTER);
+        try {
+            return LocalTime.parse(lt, TIME_FORMATTER);
+        } catch (DateTimeParseException e) {
+            return LocalTime.now().truncatedTo(ChronoUnit.MINUTES);
+        }
     }
 
     public enum DateTypeUtil {
