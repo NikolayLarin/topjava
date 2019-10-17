@@ -26,19 +26,19 @@ import static ru.javawebinar.topjava.util.DateTimeUtil.parse;
 public class MealServlet extends HttpServlet {
     private static final Logger log = LoggerFactory.getLogger(MealServlet.class);
 
-    private ConfigurableApplicationContext appCtx =
-            new ClassPathXmlApplicationContext("spring/spring-app.xml");
-    private MealRestController mealRestController =
-            appCtx.getBean(MealRestController.class);
+    private ConfigurableApplicationContext appCtx;
+    private MealRestController mealRestController;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
+        appCtx = new ClassPathXmlApplicationContext("spring/spring-app.xml");
+        mealRestController = appCtx.getBean(MealRestController.class);
     }
 
     @Override
     public void destroy() {
-        super.destroy();
+        appCtx.close();
     }
 
     @Override
@@ -55,7 +55,7 @@ public class MealServlet extends HttpServlet {
         if (meal.isNew()) {
             mealRestController.create(meal);
         } else {
-            mealRestController.update(meal);
+            mealRestController.update(meal, getId(request));
         }
         response.sendRedirect("meals");
     }
@@ -81,10 +81,10 @@ public class MealServlet extends HttpServlet {
                 request.getRequestDispatcher("/mealForm.jsp").forward(request, response);
                 break;
             default:
-                final String sd = setValue("startDate", request);
-                final String ed = setValue("endDate", request);
-                final String st = setValue("startTime", request);
-                final String et = setValue("endTime", request);
+                final String sd = getValue("startDate", request);
+                final String ed = getValue("endDate", request);
+                final String st = getValue("startTime", request);
+                final String et = getValue("endTime", request);
                 if ((sd.trim() + ed.trim() + st.trim() + et.trim()).isEmpty()) {
                     log.info("getAll");
                     request.setAttribute("meals", mealRestController.getAll());
@@ -103,7 +103,7 @@ public class MealServlet extends HttpServlet {
         return Integer.parseInt(paramId);
     }
 
-    private String setValue(String name, HttpServletRequest request) {
+    private String getValue(String name, HttpServletRequest request) {
         String value = request.getParameter(name);
         return value != null ? value : "";
     }

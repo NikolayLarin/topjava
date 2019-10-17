@@ -15,11 +15,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import static ru.javawebinar.topjava.util.DateTimeUtil.isBetweenInclusive;
 import static ru.javawebinar.topjava.web.SecurityUtil.authUserId;
-import static ru.javawebinar.topjava.web.SecurityUtil.isAuthUser;
 import static ru.javawebinar.topjava.web.SecurityUtil.setAuthUserId;
 
 @Repository
@@ -52,42 +52,58 @@ public class InMemoryMealRepository implements MealRepository {
             return meal;
         }
         // null if not found or meal does not belong to this user, when updated
-        return isAuthUser(userId) ? repository.get(userId).computeIfPresent(meal.getId(), (id, oldMeal) -> meal) : null;
+        return repository.get(userId).computeIfPresent(meal.getId(), new BiFunction<Integer, Meal, Meal>() {
+            @Override
+            public Meal apply(Integer id, Meal oldMeal) {
+                return meal;
+            }
+        });
     }
 
     @Override
     public boolean delete(int id, int userId) {
         log.info("delete {}", id);
         // false if not found or meal does not belong to this user
-        return isAuthUser(userId) && repository.get(userId).remove(id) != null;
+        Map<Integer, Meal> meals = getMealsMap(userId);
+        return meals != null && meals.remove(id) != null;
     }
 
     @Override
     public Meal get(int id, int userId) {
         log.info("get {}", id);
         // null if not found
-        return isAuthUser(userId) ? repository.get(userId).get(id) : null;
+        Map<Integer, Meal> meals = getMealsMap(userId);
+        return meals != null ? meals.get(id) : null;
     }
 
     @Override
     public List<Meal> getAll(int userId) {
         log.info("getAll with userId = {}", userId);
         // empty if not found
-        return repository.get(userId) != null ?
-                repository.get(userId).values()
-                        .stream()
-                        .sorted(Comparator.comparing(Meal::getDateTime).reversed())
-                        .collect(Collectors.toList()) :
-                new ArrayList<>();
-
+        return getMeals(userId);
     }
 
     @Override
     public List<Meal> getAllByDates(int userId, LocalDate startDate, LocalDate endDate) {
         log.info("getAllByDates with userId = {}", userId);
-        return getAll(userId)
+        return getMeals(userId)
                 .stream()
                 .filter(meal -> isBetweenInclusive(meal.getDate(), startDate, endDate))
                 .collect(Collectors.toList());
     }
+
+    private Map<Integer, Meal> getMealsMap(int userId) {
+        return repository.get(userId);
+    }
+
+    private List<Meal> getMeals(int userId) {
+        Map<Integer, Meal> meals = getMealsMap(userId);
+        return meals != null ?
+                meals.values()
+                        .stream()
+                        .sorted(Comparator.comparing(Meal::getDateTime).reversed())
+                        .collect(Collectors.toList()) :
+                new ArrayList<>();
+    }
+
 }
