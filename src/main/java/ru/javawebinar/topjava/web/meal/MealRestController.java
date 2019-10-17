@@ -12,8 +12,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
-import static ru.javawebinar.topjava.util.DateTimeUtil.isBetweenInclusive;
-import static ru.javawebinar.topjava.util.MealsUtil.getFiltered;
+import static ru.javawebinar.topjava.util.DateTimeUtil.DUMMY;
+import static ru.javawebinar.topjava.util.MealsUtil.getFilteredTos;
 import static ru.javawebinar.topjava.util.MealsUtil.getTos;
 import static ru.javawebinar.topjava.util.ValidationUtil.assureIdConsistent;
 import static ru.javawebinar.topjava.util.ValidationUtil.checkNew;
@@ -34,10 +34,12 @@ public class MealRestController {
 
     public List<MealTo> getAllFiltered(LocalDate startDate, LocalDate endDate, LocalTime startTime, LocalTime endTime) {
         log.info("getAllFiltered");
-        return getFiltered(service.getAllByDates(authUserId(), startDate, endDate),
-                authUserCaloriesPerDay(),
-                meal -> isBetweenInclusive(meal.getTime(), startTime, endTime));
-
+        startDate = startDate == DUMMY.toLocalDate() ? LocalDate.MIN : startDate;
+        endDate = endDate == DUMMY.toLocalDate() ? LocalDate.MAX : endDate;
+        startTime = startTime == DUMMY.toLocalTime() ? LocalTime.MIN : startTime;
+        endTime = endTime == DUMMY.toLocalTime() ? LocalTime.MAX : endTime;
+        return getFilteredTos(service.getAllByDates(authUserId(), startDate, endDate),
+                authUserCaloriesPerDay(), startTime, endTime);
     }
 
     public Meal get(int id) {

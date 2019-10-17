@@ -17,11 +17,8 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
-import static ru.javawebinar.topjava.util.DateTimeUtil.DateTypeUtil.END_DATE;
-import static ru.javawebinar.topjava.util.DateTimeUtil.DateTypeUtil.START_DATE;
-import static ru.javawebinar.topjava.util.DateTimeUtil.TimeTypeUtil.END_TIME;
-import static ru.javawebinar.topjava.util.DateTimeUtil.TimeTypeUtil.START_TIME;
-import static ru.javawebinar.topjava.util.DateTimeUtil.parse;
+import static ru.javawebinar.topjava.util.DateTimeUtil.parseDate;
+import static ru.javawebinar.topjava.util.DateTimeUtil.parseTime;
 
 public class MealServlet extends HttpServlet {
     private static final Logger log = LoggerFactory.getLogger(MealServlet.class);
@@ -39,6 +36,7 @@ public class MealServlet extends HttpServlet {
     @Override
     public void destroy() {
         appCtx.close();
+        super.destroy();
     }
 
     @Override
@@ -80,21 +78,22 @@ public class MealServlet extends HttpServlet {
                 request.setAttribute("meal", meal);
                 request.getRequestDispatcher("/mealForm.jsp").forward(request, response);
                 break;
-            default:
+            case "filter":
+                log.info("getAllFiltered");
                 final String sd = getValue("startDate", request);
                 final String ed = getValue("endDate", request);
                 final String st = getValue("startTime", request);
                 final String et = getValue("endTime", request);
-                if ((sd.trim() + ed.trim() + st.trim() + et.trim()).isEmpty()) {
-                    log.info("getAll");
-                    request.setAttribute("meals", mealRestController.getAll());
-                } else {
-                    log.info("getAllFiltered");
-                    request.setAttribute("meals", mealRestController.getAllFiltered(
-                            parse(sd, START_DATE), parse(ed, END_DATE),
-                            parse(st, START_TIME), parse(et, END_TIME)));
-                }
+                request.setAttribute("meals", mealRestController.getAllFiltered(
+                        parseDate(sd), parseDate(ed), parseTime(st), parseTime(et)));
                 request.getRequestDispatcher("/meals.jsp").forward(request, response);
+                break;
+            case "all":
+            default:
+                log.info("getAll");
+                request.setAttribute("meals", mealRestController.getAll());
+                request.getRequestDispatcher("/meals.jsp").forward(request, response);
+                break;
         }
     }
 

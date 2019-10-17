@@ -28,8 +28,9 @@
     <a href="meals?action=create">Add Meal</a>
     <br><br>
 
-    <form action="meals">
+    <form method="get" action="meals">
         <p>Введите даты начала и окончания выборки</p>
+        <input type="text" name="action" value="filter" hidden>
         <input type="date" name="startDate" value='${param.get("startDate")}'>
         <input type="date" name="endDate" value='${param.get("endDate")}'>
         <br/><br/>
@@ -41,8 +42,8 @@
         <br/>
     </form>
 
-    <form action="meals">
-        <input type="submit" value="Сбросить фильтры">
+    <form method="get" action="meals">
+        <input type="submit" value="Отменить фильтрацию">
         <br/><br/>
     </form>
 

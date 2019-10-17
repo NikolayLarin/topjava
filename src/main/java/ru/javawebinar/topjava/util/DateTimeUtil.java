@@ -4,10 +4,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.time.temporal.ChronoUnit;
 
 public class DateTimeUtil {
+    public static final LocalDateTime DUMMY = LocalDateTime.of(3000, 1, 1, 1, 1);
+
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
@@ -20,24 +20,14 @@ public class DateTimeUtil {
         return ldt == null ? "" : ldt.format(DATE_TIME_FORMATTER);
     }
 
-    public static LocalDate parse(String ld, DateTypeUtil type) {
-        switch (type) {
-            case START_DATE:
-                return isEmpty(ld) ? LocalDate.MIN : ldParse(ld);
-            case END_DATE:
-                return isEmpty(ld) ? LocalDate.MAX : ldParse(ld);
-        }
-        return LocalDate.now();
+    public static LocalDate parseDate(String ld) {
+        return isEmpty(ld) ? DUMMY.toLocalDate() : ldParse(ld);
+
     }
 
-    public static LocalTime parse(String lt, TimeTypeUtil type) {
-        switch (type) {
-            case START_TIME:
-                return isEmpty(lt) ? LocalTime.MIN : ltParse(lt);
-            case END_TIME:
-                return isEmpty(lt) ? LocalTime.MAX : ltParse(lt);
-        }
-        return LocalTime.now().truncatedTo(ChronoUnit.MINUTES);
+    public static LocalTime parseTime(String lt) {
+        return isEmpty(lt) ? DUMMY.toLocalTime() : ltParse(lt);
+
     }
 
     private static boolean isEmpty(String s) {
@@ -45,28 +35,10 @@ public class DateTimeUtil {
     }
 
     private static LocalDate ldParse(String ld) {
-        try {
-            return LocalDate.parse(ld, DATE_FORMATTER);
-        } catch (DateTimeParseException e) {
-            return LocalDate.now();
-        }
+        return LocalDate.parse(ld, DATE_FORMATTER);
     }
 
     private static LocalTime ltParse(String lt) {
-        try {
-            return LocalTime.parse(lt, TIME_FORMATTER);
-        } catch (DateTimeParseException e) {
-            return LocalTime.now().truncatedTo(ChronoUnit.MINUTES);
-        }
-    }
-
-    public enum DateTypeUtil {
-        START_DATE,
-        END_DATE;
-    }
-
-    public enum TimeTypeUtil {
-        START_TIME,
-        END_TIME;
+        return LocalTime.parse(lt, TIME_FORMATTER);
     }
 }

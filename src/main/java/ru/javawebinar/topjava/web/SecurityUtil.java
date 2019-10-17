@@ -17,8 +17,4 @@ public class SecurityUtil {
     public static void setAuthUserId(int userId) {
         authUserId = userId;
     }
-
-    public static boolean isAuthUser(int userId) {
-        return userId == authUserId;
-    }
 }
