@@ -32,6 +32,10 @@
         </dl>
         <button type="submit">Filter</button>
     </form>
+    <form method="get" action="meals">
+        <input type="submit" value="Отменить фильтрацию">
+        <br/><br/>
+    </form>
     <hr/>
     <a href="meals?action=create">Add Meal</a>
     <br><br>
