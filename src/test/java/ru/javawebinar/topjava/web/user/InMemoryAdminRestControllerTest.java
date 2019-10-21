@@ -1,6 +1,10 @@
 package ru.javawebinar.topjava.web.user;
 
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import ru.javawebinar.topjava.UserTestData;
@@ -19,7 +23,8 @@ public class InMemoryAdminRestControllerTest {
 
     @BeforeClass
     public static void beforeClass() {
-        appCtx = new ClassPathXmlApplicationContext("spring-test.xml");
+        appCtx = new ClassPathXmlApplicationContext(
+                "spring-test-in-memory-repository.xml", "spring/spring-web-service.xml");
         System.out.println("\n" + Arrays.toString(appCtx.getBeanDefinitionNames()) + "\n");
         controller = appCtx.getBean(AdminRestController.class);
     }
@@ -30,14 +35,14 @@ public class InMemoryAdminRestControllerTest {
     }
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         // re-initialize
         InMemoryUserRepository repository = appCtx.getBean(InMemoryUserRepository.class);
         repository.init();
     }
 
     @Test
-    public void delete() throws Exception {
+    public void delete() {
         controller.delete(UserTestData.USER_ID);
         Collection<User> users = controller.getAll();
         Assert.assertEquals(users.size(), 1);
@@ -45,7 +50,7 @@ public class InMemoryAdminRestControllerTest {
     }
 
     @Test(expected = NotFoundException.class)
-    public void deleteNotFound() throws Exception {
+    public void deleteNotFound() {
         controller.delete(10);
     }
 }

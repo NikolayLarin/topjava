@@ -1,6 +1,5 @@
 package ru.javawebinar.topjava.service;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.bridge.SLF4JBridgeHandler;
@@ -13,22 +12,24 @@ import org.springframework.test.context.junit4.SpringRunner;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static ru.javawebinar.topjava.MealTestData.ALL;
+import static java.time.LocalDate.parse;
+import static ru.javawebinar.topjava.MealTestData.ALL_ADMIN_MEALS;
 import static ru.javawebinar.topjava.MealTestData.ALL_IN_2019_10_20;
-import static ru.javawebinar.topjava.MealTestData.MEAL_1;
-import static ru.javawebinar.topjava.web.SecurityUtil.authUserId;
+import static ru.javawebinar.topjava.MealTestData.ALL_USER_MEALS;
+import static ru.javawebinar.topjava.MealTestData.USER_MEAL_1;
+import static ru.javawebinar.topjava.MealTestData.assertMatch;
+import static ru.javawebinar.topjava.UserTestData.ADMIN_ID;
+import static ru.javawebinar.topjava.UserTestData.USER_ID;
 
 @ContextConfiguration({
-        "classpath:spring/spring-app.xml",
+        "classpath:spring/spring-jdbc-repository.xml",
+        "classpath:spring/spring-web-service.xml",
         "classpath:spring/spring-db.xml"
 })
-
 @RunWith(SpringRunner.class)
 @Sql(scripts = "classpath:db/populateDB.sql", config = @SqlConfig(encoding = "UTF-8"))
 public class MealServiceTest {
@@ -45,77 +46,68 @@ public class MealServiceTest {
 
     @Test
     public void create() {
-        Meal newMeal = new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "new meal", 500);
-        Meal created = service.create(newMeal, authUserId());
-        newMeal.setId(created.getId());
-        assertMatch(created, newMeal);
+        Meal created = service.create(
+                new Meal(LocalDateTime.parse("0000-01-01T00:01"), "New Age meal", 50), USER_ID);
+        List<Meal> expected = new ArrayList<>(ALL_USER_MEALS);
+        expected.add(created);
+        assertMatch(service.getAll(USER_ID), expected);
+        assertMatch(service.getAll(ADMIN_ID), ALL_ADMIN_MEALS);
     }
 
     @Test(expected = DataAccessException.class)
     public void createDuplicatedDateTime() {
-        Meal duplicated = new Meal(null, MEAL_1.getDateTime(), "new " + MEAL_1.getDescription(), 50);
-        service.create(duplicated, authUserId());
-
+        service.create(
+                new Meal(null, USER_MEAL_1.getDateTime(), "new " + USER_MEAL_1.getDescription(), 50),
+                USER_ID);
     }
 
     @Test
     public void update() {
-        Meal updated = new Meal(MEAL_1);
-        updated.setDescription("new " + MEAL_1.getDescription());
-        updated.setCalories(MEAL_1.getCalories() + 1);
-        service.update(updated, authUserId());
-        assertMatch(service.get(MEAL_1.getId(), authUserId()), updated);
+        Meal updated = new Meal(USER_MEAL_1);
+        updated.setDescription("new description");
+        updated.setCalories(501);
+        service.update(updated, USER_ID);
+        assertMatch(service.get(USER_MEAL_1.getId(), USER_ID), updated);
     }
 
     @Test(expected = NotFoundException.class)
     public void updateForeignMeal() {
-        service.update(MEAL_1, authUserId() + 1);
+        service.update(USER_MEAL_1, ADMIN_ID);
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void delete() {
-        int size = service.getAll(authUserId()).size();
-        service.delete(MEAL_1.getId(), authUserId());
-        Assert.assertEquals(size - 1, service.getAll(authUserId()).size());
-        service.get(MEAL_1.getId(), authUserId());
+        service.delete(USER_MEAL_1.getId(), USER_ID);
+        List<Meal> expected = new ArrayList<>(ALL_USER_MEALS);
+        expected.remove(USER_MEAL_1);
+        assertMatch(service.getAll(USER_ID), expected);
+        assertMatch(service.getAll(ADMIN_ID), ALL_ADMIN_MEALS);
     }
 
     @Test(expected = NotFoundException.class)
     public void deleteForeignMeal() {
-        service.delete(MEAL_1.getId(), authUserId() + 1);
+        service.delete(USER_MEAL_1.getId(), ADMIN_ID);
     }
 
     @Test
     public void get() {
-        Meal expected = new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "завтрак", 500);
-        Meal actual = service.create(expected, authUserId());
-        expected.setId(actual.getId());
-        assertMatch(service.get(actual.getId(), authUserId()), expected);
+        assertMatch(service.get(USER_MEAL_1.getId(), USER_ID), USER_MEAL_1);
     }
 
     @Test(expected = NotFoundException.class)
     public void getForeignMeal() {
-        service.get(MEAL_1.getId(), authUserId() + 1);
+        service.get(USER_MEAL_1.getId(), ADMIN_ID);
     }
+
 
     @Test
     public void getAll() {
-        List<Meal> all = service.getAll(authUserId());
-        for (int i = 0; i < all.size(); i++) {
-            assertMatch(all.get(i), ALL.get(i));
-        }
+        assertMatch(service.getAll(USER_ID), ALL_USER_MEALS);
+        assertMatch(service.getAll(ADMIN_ID), ALL_ADMIN_MEALS);
     }
 
     @Test
     public void getBetweenDates() {
-        LocalDate ld = LocalDate.parse("2019-10-20");
-        List<Meal> all = service.getBetweenDates(ld, ld, authUserId());
-        for (int i = 0; i < all.size(); i++) {
-            assertMatch(all.get(i), ALL_IN_2019_10_20.get(i));
-        }
-    }
-
-    private void assertMatch(Meal actual, Meal expected) {
-        assertThat(actual).isEqualToComparingFieldByField(expected);
+        assertMatch(service.getBetweenDates(parse("2019-10-20"), parse("2019-10-20"), USER_ID), ALL_IN_2019_10_20);
     }
 }
