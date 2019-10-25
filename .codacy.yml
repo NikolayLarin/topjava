@@ -2,4 +2,9 @@
 exclude_paths:
   - 'src/main/webapp/**'
   - 'README.md'
+  - 'cv.md'
+  - 'description.md'
+  - 'graduation.md'
+  - 'ReleaseNotes.md'
+  - 'doc/lesson07.md'
   - '**.sql'
