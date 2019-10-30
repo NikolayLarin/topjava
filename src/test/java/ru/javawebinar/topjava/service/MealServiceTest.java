@@ -4,6 +4,8 @@ import org.junit.AfterClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.rules.Stopwatch;
+import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 import org.junit.runner.RunWith;
@@ -20,6 +22,7 @@ import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.concurrent.TimeUnit;
 
 import static ru.javawebinar.topjava.MealTestData.ADMIN_MEAL1;
 import static ru.javawebinar.topjava.MealTestData.ADMIN_MEAL_ID;
@@ -45,7 +48,8 @@ import static ru.javawebinar.topjava.UserTestData.USER_ID;
 @Sql(scripts = "classpath:db/populateDB.sql", config = @SqlConfig(encoding = "UTF-8"))
 public class MealServiceTest {
     private static final Logger log = LoggerFactory.getLogger(MealServiceTest.class);
-    private static String watcherLog = "tests execution results:";
+    private static String watcherLog = "tests execution results:\n";
+    private static long spentTime;
     private static long totalTime;
     private static long totalPassed;
     private static long totalFailed;
@@ -65,36 +69,40 @@ public class MealServiceTest {
     public final ExpectedException thrown = ExpectedException.none();
 
     @Rule
-    public final TestWatcher watcher = new TestWatcher() {
-        private long startTime;
+    public final TestRule timeCounter = new Stopwatch() {
+        @Override
+        protected void finished(long nanos, Description description) {
+            spentTime = TimeUnit.NANOSECONDS.toMillis(nanos);
+            totalTime += spentTime;
+        }
+    };
 
+    @Rule
+    public final TestRule watcher = new TestWatcher() {
         @Override
         public void starting(Description d) {
-            startTime = System.currentTimeMillis();
-            log.info("Test {}() started!", d.getMethodName());
-
+            log.info("Test {}() started", d.getMethodName());
         }
 
         @Override
         public void succeeded(Description d) {
-            log.info("Test {}(): passed!", d.getMethodName());
-            watcherLog += "\n\nTest " + d.getMethodName() + "() in " + d.getClassName() + ":\n - passed";
-            totalPassed += 1;
+            log.info("Test {}() passed", d.getMethodName());
+            totalPassed++;
         }
 
         @Override
         public void failed(Throwable e, Description d) {
-            log.error("Test {}(): failed!", d.getMethodName());
-            watcherLog += "\nTest " + d.getMethodName() + "() in " + d.getClassName() + ":\n - failed with " + e;
-            totalFailed += 1;
+            log.error("Test {}() failed", d.getMethodName());
+            totalFailed++;
         }
 
         @Override
-        public void finished(Description description) {
-            long spentTime = System.currentTimeMillis() - startTime;
-            log.info("Test {}(): spent time = {} ms", description.getMethodName(), spentTime);
-            watcherLog += "\n - spent time = " + spentTime + " ms";
-            totalTime += spentTime;
+        public void finished(Description d) {
+            final String methodName = d.getMethodName();
+            log.info("Test {}() spent time = {} ms", methodName, spentTime);
+            watcherLog += "\n \u2022 " + methodName + "() " +
+                    String.format("%" + (30 - methodName.length()) + "c", ' ').replaceAll(" ", ".") +
+                    " " + spentTime + " ms";
         }
     };
 
@@ -168,6 +176,16 @@ public class MealServiceTest {
         thrown.expect(NotFoundException.class);
         thrown.expectMessage("Not found entity with id=" + MEAL1_ID);
         service.update(MEAL1, ADMIN_ID);
+    }
+
+    @Test
+    public void updateNotExist() {
+        thrown.expect(NotFoundException.class);
+        final int notExistId = MEAL1.getId() + 1000000000;
+        thrown.expectMessage("Not found entity with id=" + notExistId);
+        service.update(new Meal(notExistId, MEAL1.getDateTime(),
+                        MEAL1.getDescription(), MEAL1.getCalories()),
+                USER_ID);
     }
 
     @Test

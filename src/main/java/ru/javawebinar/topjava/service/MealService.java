@@ -32,8 +32,8 @@ public class MealService {
 
     public List<Meal> getBetweenDates(@Nullable LocalDate startDate, @Nullable LocalDate endDate, int userId) {
         return repository.getBetween(
-                DateTimeUtil.createDateTime(startDate, LocalDate.now().minusYears(200), LocalTime.MIN),
-                DateTimeUtil.createDateTime(endDate, LocalDate.now().plusYears(200), LocalTime.MAX),
+                DateTimeUtil.createDateTime(startDate, DateTimeUtil.POSTGRES_MIN, LocalTime.MIN),
+                DateTimeUtil.createDateTime(endDate, DateTimeUtil.HSQLDB_MAX, LocalTime.MAX),
                 userId);
     }
 

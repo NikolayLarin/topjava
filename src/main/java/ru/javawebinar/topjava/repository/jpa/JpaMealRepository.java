@@ -26,10 +26,11 @@ public class JpaMealRepository implements MealRepository {
         if (meal.isNew()) {
             em.persist(meal);
             return meal;
-        } else if (em.find(Meal.class, meal.getId()).getUser().getId() == userId) {
-            return em.merge(meal);
+        } else {
+            Meal found = em.find(Meal.class, meal.getId());
+            return found == null ? null : found.getUser().getId() == userId ?
+                    em.merge(meal) : null;
         }
-        return null;
     }
 
     @Override
