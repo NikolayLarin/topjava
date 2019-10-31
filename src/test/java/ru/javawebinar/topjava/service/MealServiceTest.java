@@ -6,7 +6,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.Stopwatch;
 import org.junit.rules.TestRule;
-import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -49,21 +48,9 @@ import static ru.javawebinar.topjava.UserTestData.USER_ID;
 public class MealServiceTest {
     private static final Logger log = LoggerFactory.getLogger(MealServiceTest.class);
     private static String watcherLog = "tests execution results:\n";
-    private static long spentTime;
-    private static long totalTime;
-    private static long totalPassed;
-    private static long totalFailed;
 
     @Autowired
     private MealService service;
-
-    @AfterClass
-    public static void afterClass() {
-        log.info("{}\n" +
-                "\nTotal time for all tests: {} ms" +
-                "\nTotal tests passed: {}" +
-                "\nTotal tests failed: {}", watcherLog, totalTime, totalPassed, totalFailed);
-    }
 
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
@@ -71,40 +58,30 @@ public class MealServiceTest {
     @Rule
     public final TestRule timeCounter = new Stopwatch() {
         @Override
-        protected void finished(long nanos, Description description) {
-            spentTime = TimeUnit.NANOSECONDS.toMillis(nanos);
-            totalTime += spentTime;
-        }
-    };
-
-    @Rule
-    public final TestRule watcher = new TestWatcher() {
-        @Override
-        public void starting(Description d) {
-            log.info("Test {}() started", d.getMethodName());
-        }
-
-        @Override
-        public void succeeded(Description d) {
+        protected void succeeded(long nanos, Description d) {
             log.info("Test {}() passed", d.getMethodName());
-            totalPassed++;
         }
 
         @Override
-        public void failed(Throwable e, Description d) {
+        protected void failed(long nanos, Throwable e, Description d) {
             log.error("Test {}() failed", d.getMethodName());
-            totalFailed++;
         }
 
         @Override
-        public void finished(Description d) {
+        protected void finished(long nanos, Description d) {
+            final long spentTime = TimeUnit.NANOSECONDS.toMillis(nanos);
             final String methodName = d.getMethodName();
             log.info("Test {}() spent time = {} ms", methodName, spentTime);
-            watcherLog += "\n \u2022 " + methodName + "() " +
+            watcherLog += "\n" + methodName + "() " +
                     String.format("%" + (30 - methodName.length()) + "c", ' ').replaceAll(" ", ".") +
                     " " + spentTime + " ms";
         }
     };
+
+    @AfterClass
+    public static void afterClass() {
+        log.info("{}\n", watcherLog);
+    }
 
     @Test
     public void delete() {
