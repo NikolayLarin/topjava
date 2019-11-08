@@ -48,13 +48,12 @@ public class DataJpaMealRepository implements MealRepository {
     @Override
     public Meal get(int id, int userId) {
         Meal meal = crudMealRepository.findById(id).orElse(null);
-        return getMeal(meal, userId);
+        return meal != null && meal.getUser().getId() == userId ? meal : null;
     }
 
     @Override
     public Meal getWithUser(int id, int userId) {
-        Meal meal = crudMealRepository.getWithUser(id, userId).orElse(null);
-        return getMeal(meal, userId);
+        return crudMealRepository.getWithUser(id, userId);
     }
 
     @Override
@@ -66,9 +65,5 @@ public class DataJpaMealRepository implements MealRepository {
     public List<Meal> getBetweenInclusive(LocalDate startDate, LocalDate endDate, int userId) {
         return crudMealRepository.findAllByUserIdAndDateTimeGreaterThanEqualAndDateTimeIsLessThan(
                 userId, getStartInclusive(startDate), getEndExclusive(endDate), SORT_DATE_TIME_DESC);
-    }
-
-    private Meal getMeal(Meal meal, int userId) {
-        return meal != null && meal.getUser().getId() == userId ? meal : null;
     }
 }
