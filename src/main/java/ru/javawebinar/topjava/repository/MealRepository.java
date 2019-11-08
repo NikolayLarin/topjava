@@ -23,6 +23,6 @@ public interface MealRepository {
     List<Meal> getBetweenInclusive(@Nullable LocalDate startDate, @Nullable LocalDate endDate, int userId);
 
     default Meal getWithUser(int id, int userId) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 }
