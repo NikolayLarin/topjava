@@ -1,17 +1,16 @@
-package ru.javawebinar.topjava.service;
+package ru.javawebinar.topjava.service.datajpa;
 
 import org.junit.Test;
 import org.springframework.test.context.ActiveProfiles;
 import ru.javawebinar.topjava.MealTestData;
 import ru.javawebinar.topjava.Profiles;
 import ru.javawebinar.topjava.UserTestData;
-import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.model.Role;
 import ru.javawebinar.topjava.model.User;
+import ru.javawebinar.topjava.service.AbstractUserServiceTest;
 
 import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 
 import static ru.javawebinar.topjava.MealTestData.MEALS;
 import static ru.javawebinar.topjava.UserTestData.USER;
@@ -22,8 +21,9 @@ public class DataJpaUserServiceTest extends AbstractUserServiceTest {
 
     @Test
     public void getWithMeals() {
-        UserTestData.assertMatch(getUser(USER_ID), USER);
-        MealTestData.assertMatch(getMeals(USER_ID), MEALS);
+        final User withMeals = getWithMeals(USER_ID);
+        UserTestData.assertMatch(withMeals, USER);
+        MealTestData.assertMatch(withMeals.getMeals(), MEALS);
     }
 
     @Test
@@ -31,18 +31,12 @@ public class DataJpaUserServiceTest extends AbstractUserServiceTest {
         User newUser = service.create(new User(
                 null, "New", "new@gmail.com", "newPass",
                 1555, false, new Date(), Collections.singleton(Role.ROLE_USER)));
-        final Integer id = newUser.getId();
-        UserTestData.assertMatch(getUser(id), newUser);
-        MealTestData.assertMatch(getMeals(id), Collections.emptyList());
+        final User withMeals = getWithMeals(newUser.getId());
+        UserTestData.assertMatch(withMeals, newUser);
+        MealTestData.assertMatch(withMeals.getMeals(), Collections.emptyList());
     }
 
-    private User getUser(Integer id) {
-        final User withMeals = service.getWithMeals(id);
-        return withMeals;
-    }
-
-    private List<Meal> getMeals(Integer id) {
-        final List<Meal> meals = service.getWithMeals(id).getMeals();
-        return meals;
+    private User getWithMeals(Integer id) {
+        return service.getWithMeals(id);
     }
 }
