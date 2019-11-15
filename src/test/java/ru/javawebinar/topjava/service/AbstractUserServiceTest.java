@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Set;
 
 import static ru.javawebinar.topjava.UserTestData.ADMIN;
+import static ru.javawebinar.topjava.UserTestData.ADMIN_ID;
 import static ru.javawebinar.topjava.UserTestData.USER;
 import static ru.javawebinar.topjava.UserTestData.USER_ID;
 import static ru.javawebinar.topjava.UserTestData.assertMatch;
@@ -30,6 +31,7 @@ public abstract class AbstractUserServiceTest extends AbstractServiceTest {
     @Test
     public void create() throws Exception {
         User newUser = getNew();
+        newUser.addRole(Role.ROLE_ADMIN);
         User created = service.create(newUser);
         Integer newId = created.getId();
         newUser.setId(newId);
@@ -57,6 +59,9 @@ public abstract class AbstractUserServiceTest extends AbstractServiceTest {
     public void get() throws Exception {
         User user = service.get(USER_ID);
         assertMatch(user, USER);
+
+        User admin = service.get(ADMIN_ID);
+        assertMatch(admin, ADMIN);
     }
 
     @Test(expected = NotFoundException.class)
@@ -73,6 +78,10 @@ public abstract class AbstractUserServiceTest extends AbstractServiceTest {
     @Test
     public void update() throws Exception {
         User updated = getUpdated();
+        service.update(updated);
+        assertMatch(service.get(USER_ID), updated);
+
+        updated.addRole(Role.ROLE_ADMIN);
         service.update(updated);
         assertMatch(service.get(USER_ID), updated);
     }
