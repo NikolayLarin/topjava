@@ -21,6 +21,10 @@ public class UserTestData {
         return new User(null, "New", "new@gmail.com", "newPass", 1555, false, new Date(), Collections.singleton(Role.ROLE_USER));
     }
 
+    public static User getNewWithEmptyRoles() {
+        return new User(null, "NewWithNoRoles", "newWithNoRoles@gmail.com", "newPass", 1555, false, new Date(), Collections.emptySet());
+    }
+
     public static User getUpdated() {
         User updated = new User(USER);
         updated.setName("UpdatedName");

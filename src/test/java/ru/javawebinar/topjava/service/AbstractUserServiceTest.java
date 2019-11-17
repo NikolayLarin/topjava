@@ -3,11 +3,9 @@ package ru.javawebinar.topjava.service;
 import org.junit.Assume;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.CacheManager;
 import org.springframework.dao.DataAccessException;
 import ru.javawebinar.topjava.model.Role;
 import ru.javawebinar.topjava.model.User;
-import ru.javawebinar.topjava.repository.JpaUtil;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import javax.validation.ConstraintViolationException;
@@ -21,6 +19,7 @@ import static ru.javawebinar.topjava.UserTestData.USER;
 import static ru.javawebinar.topjava.UserTestData.USER_ID;
 import static ru.javawebinar.topjava.UserTestData.assertMatch;
 import static ru.javawebinar.topjava.UserTestData.getNew;
+import static ru.javawebinar.topjava.UserTestData.getNewWithEmptyRoles;
 import static ru.javawebinar.topjava.UserTestData.getUpdated;
 
 public abstract class AbstractUserServiceTest extends AbstractServiceTest {
@@ -31,23 +30,33 @@ public abstract class AbstractUserServiceTest extends AbstractServiceTest {
     @Test
     public void create() throws Exception {
         User newUser = getNew();
-        newUser.addRole(Role.ROLE_ADMIN);
+        newUser.addRole(Role.ROLE_USER, Role.ROLE_ADMIN);
         User created = service.create(newUser);
         Integer newId = created.getId();
         newUser.setId(newId);
         assertMatch(created, newUser);
         assertMatch(service.get(newId), newUser);
+
+        User newUserWithNoRoles = getNewWithEmptyRoles();
+        User createdWithNoRoles = service.create(newUserWithNoRoles);
+        Integer newUserWithNoRolesId = createdWithNoRoles.getId();
+        newUserWithNoRoles.setId(newUserWithNoRolesId);
+        assertMatch(createdWithNoRoles, newUserWithNoRoles);
+        assertMatch(service.get(newUserWithNoRolesId), newUserWithNoRoles);
     }
 
     @Test(expected = DataAccessException.class)
     public void duplicateMailCreate() throws Exception {
-        service.create(new User(null, "Duplicate", "user@yandex.ru", "newPass", Role.ROLE_USER));
+        service.create(new User(null, "Duplicate", "user@yandex.ru", "newPass", Role.ROLE_USER, Role.ROLE_ADMIN));
     }
 
     @Test(expected = NotFoundException.class)
     public void delete() throws Exception {
         service.delete(USER_ID);
         service.get(USER_ID);
+        service.delete(ADMIN_ID);
+        service.get(ADMIN_ID);
+
     }
 
     @Test(expected = NotFoundException.class)
@@ -73,6 +82,8 @@ public abstract class AbstractUserServiceTest extends AbstractServiceTest {
     public void getByEmail() throws Exception {
         User user = service.getByEmail("user@yandex.ru");
         assertMatch(user, USER);
+        User admin = service.getByEmail("admin@gmail.com");
+        assertMatch(admin, ADMIN);
     }
 
     @Test
@@ -82,6 +93,14 @@ public abstract class AbstractUserServiceTest extends AbstractServiceTest {
         assertMatch(service.get(USER_ID), updated);
 
         updated.addRole(Role.ROLE_ADMIN);
+        service.update(updated);
+        assertMatch(service.get(USER_ID), updated);
+
+        updated.removeRole(Role.ROLE_USER);
+        service.update(updated);
+        assertMatch(service.get(USER_ID), updated);
+
+        updated.clearRoles();
         service.update(updated);
         assertMatch(service.get(USER_ID), updated);
     }
@@ -100,10 +119,5 @@ public abstract class AbstractUserServiceTest extends AbstractServiceTest {
         validateRootCause(() -> service.create(new User(null, "User", "mail@yandex.ru", "  ", Role.ROLE_USER)), ConstraintViolationException.class);
         validateRootCause(() -> service.create(new User(null, "User", "mail@yandex.ru", "password", 9, true, new Date(), Set.of())), ConstraintViolationException.class);
         validateRootCause(() -> service.create(new User(null, "User", "mail@yandex.ru", "password", 10001, true, new Date(), Set.of())), ConstraintViolationException.class);
-    }
-
-    protected void setUp(CacheManager cacheManager, JpaUtil jpaUtil) {
-        cacheManager.getCache("users").clear();
-        jpaUtil.clear2ndLevelHibernateCache();
     }
 }
