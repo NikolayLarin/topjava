@@ -3,21 +3,18 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://topjava.javawebinar.ru/functions" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
-<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
-
 
 <html>
+<base href="${pageContext.request.contextPath}/"/>
 <jsp:include page="fragments/headTag.jsp"/>
 <body>
 <jsp:include page="fragments/bodyHeader.jsp"/>
-
-<base href="${pageContext.request.contextPath}/"/>
 
 <section>
     <hr/>
     <h3><spring:message code="meal.title"/></h3>
 
-    <form method="get" action="filter">
+    <form method="get" action="meals/filter">
         <dl>
             <dt><spring:message code="meal.startDate"/>:</dt>
             <dd><input type="date" name="startDate" value="${param.startDate}"></dd>
@@ -36,10 +33,15 @@
         </dl>
         <button type="submit"><spring:message code="meal.filter"/></button>
     </form>
-
     <hr/>
-    <a href="create"><spring:message code="meal.create"/></a>
-    <br><br>
+
+    <spring:url value="/meals/create/" var="createUrl"/>
+    <p>
+        <button onclick="location.href='${createUrl}'">
+            <spring:message code="meal.create"/>
+        </button>
+    </p>
+
     <table border="1" cellpadding="8" cellspacing="0">
         <thead>
         <tr>
@@ -50,6 +52,7 @@
             <th></th>
         </tr>
         </thead>
+        <jsp:useBean id="meals" scope="request" type="java.util.List"/>
         <c:forEach items="${meals}" var="meal">
             <jsp:useBean id="meal" type="ru.javawebinar.topjava.to.MealTo"/>
             <tr data-mealExcess="${meal.excess}">
@@ -61,10 +64,15 @@
                 </td>
                 <td>${meal.description}</td>
                 <td>${meal.calories}</td>
-                <td><a href="update?id=${meal.id}"><spring:message code="meal.update"/></a></td>
                 <td>
-                    <spring:url value="/meals/${meal.id}/delete" var="deleteUrl"/>
-                    <button class="btn btn-info" onclick="location.href='${deleteUrl}'">
+                    <spring:url value="/meals/update/${meal.id}" var="updateUrl"/>
+                    <button onclick="location.href='${updateUrl}'">
+                        <spring:message code="meal.update"/>
+                    </button>
+                </td>
+                <td>
+                    <spring:url value="/meals/delete/${meal.id}" var="deleteUrl"/>
+                    <button onclick="location.href='${deleteUrl}'">
                         <spring:message code="meal.delete"/>
                     </button>
                 </td>

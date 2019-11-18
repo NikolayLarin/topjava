@@ -1,15 +1,14 @@
-package ru.javawebinar.topjava.web;
+package ru.javawebinar.topjava.web.meal;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.service.MealService;
-import ru.javawebinar.topjava.web.meal.AbstractMealController;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -19,13 +18,14 @@ import static ru.javawebinar.topjava.util.DateTimeUtil.parseLocalDate;
 import static ru.javawebinar.topjava.util.DateTimeUtil.parseLocalTime;
 
 @Controller
+@RequestMapping(value = "/meals")
 public class JspMealController extends AbstractMealController {
 
     public JspMealController(MealService service) {
         super(service);
     }
 
-    @GetMapping("/meals")
+    @GetMapping("")
     public String getAll(Model model) {
         model.addAttribute("meals", super.getAll());
         return "meals";
@@ -46,61 +46,40 @@ public class JspMealController extends AbstractMealController {
     }
 
     @GetMapping("/create")
-    public String create(Model model) {
+    public String getNew(Model model) {
         final Meal meal = new Meal(
                 LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 1000);
         addAttribute(model, meal, "create");
         return "mealForm";
     }
 
-//    @GetMapping("/meals/{id}/update")
-//    public String update(Model model, @PathVariable String id) {
-//        final Meal meal = super.get(getParsed(id));
-//        addAttribute(model, meal, "update");
-//        return "mealForm";
-//    }
-
-    @GetMapping("/update")
-    public String update(Model model, @RequestParam("id") String id) {
+    @GetMapping("/update/{id}")
+    public String getPresent(Model model, @PathVariable String id) {
         final Meal meal = super.get(getParsed(id));
         addAttribute(model, meal, "update");
         return "mealForm";
     }
 
-    @GetMapping("/meals/{id}/delete")
-    public String delete(@PathVariable String id) {
-        super.delete(getParsed(id));
+    @PostMapping("/{action}")
+    public String create(@PathVariable String action,
+                         @RequestParam("dateTime") String dateTime,
+                         @RequestParam("description") String description,
+                         @RequestParam("calories") String calories,
+                         @RequestParam("id") String id) {
+        final Meal meal = new Meal(
+                LocalDateTime.parse(dateTime), description, getParsed(calories));
+        if (action.equals("create")) {
+            super.create(meal);
+        } else if (action.equals("update")) {
+            super.update(meal, getParsed(id));
+        }
         return "redirect:/meals";
     }
 
-//    @PostMapping("/meals/{id}/createOrUpdate")
-//    public String createOrUpdate(@RequestParam("dateTime") String dateTime,
-//                                 @RequestParam("description") String description,
-//                                 @RequestParam("calories") String calories,
-//                                 @PathVariable String id) {
-//        Meal meal = new Meal(
-//                LocalDateTime.parse(dateTime), description, getParsed(calories));
-//        if (StringUtils.isEmpty(id)) {
-//            super.create(meal);
-//        } else {
-//            super.update(meal, getParsed(id));
-//        }
-//        return "redirect:/meals";
-//    }
-
-    @PostMapping("/createOrUpdate")
-    public String createOrUpdate(@RequestParam("dateTime") String dateTime,
-                                 @RequestParam("description") String description,
-                                 @RequestParam("calories") String calories,
-                                 @RequestParam("id") String id) {
-        Meal meal = new Meal(
-                LocalDateTime.parse(dateTime), description, getParsed(calories));
-        if (StringUtils.isEmpty(id)) {
-            super.create(meal);
-        } else {
-            super.update(meal, getParsed(id));
-        }
-        return "redirect:meals";
+    @GetMapping("/delete/{id}")
+    public String delete(@PathVariable String id) {
+        super.delete(getParsed(id));
+        return "redirect:/meals";
     }
 
     private static Integer getParsed(String param) {
