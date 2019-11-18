@@ -81,7 +81,7 @@ public class User extends AbstractNamedEntity {
     @OrderBy("dateTime DESC")
     protected List<Meal> meals;
 
-    public User() {
+    protected User() {
     }
 
     public User(User u) {

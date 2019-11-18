@@ -46,7 +46,7 @@ public class Meal extends AbstractBaseEntity {
     @NotNull
     private User user;
 
-    public Meal() {
+    protected Meal() {
     }
 
     public Meal(LocalDateTime dateTime, String description, int calories) {

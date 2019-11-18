@@ -114,31 +114,31 @@ public class JdbcUserRepository implements UserRepository {
         Map<Integer, User> userMap = new LinkedHashMap<>();
 
         jdbcTemplate.query("" +
-                "SELECT * FROM users u " +
-                "  LEFT JOIN user_roles ur " +
-                "    ON u.id=ur.user_id" +
-                " ORDER BY name, email", rs -> {
-            do {
-                User user = new User();
-                user.setId(rs.getInt("id"));
-                user.setName(rs.getString("name"));
-                user.setEmail(rs.getString("email"));
-                user.setPassword(rs.getString("password"));
-                user.setRegistered(rs.getTimestamp("registered"));
-                user.setEnabled(rs.getBoolean("enabled"));
-                user.setCaloriesPerDay(rs.getInt("calories_per_day"));
-                userMap
-                        .computeIfAbsent(user.getId(), id -> user)
-                        .addRole(getRole(rs));
-                String s = "s";
-            } while (rs.next());
-        });
+                        "SELECT * FROM users u " +
+                        "  LEFT JOIN user_roles ur " +
+                        "    ON u.id=ur.user_id" +
+                        " ORDER BY name, email",
+                rs -> {
+                    do {
+                        User user = new User(
+                                rs.getInt("id"),
+                                rs.getString("name"),
+                                rs.getString("email"),
+                                rs.getString("password"),
+                                rs.getInt("calories_per_day"),
+                                rs.getBoolean("enabled"),
+                                rs.getTimestamp("registered"),
+                                null);
+                        userMap.computeIfAbsent(user.getId(), id -> user).addRole(getRole(rs));
+                    } while (rs.next());
+                });
         return new ArrayList<>(userMap.values());
     }
 
     private static User getUserWithRoles(int id, User user, JdbcTemplate jdbcTemplate) {
         jdbcTemplate.query(
-                "SELECT * FROM user_roles WHERE user_id=?", (rs, rowNum) -> {
+                "SELECT * FROM user_roles WHERE user_id=?",
+                (rs, rowNum) -> {
                     assert user != null;
                     user.addRole(getRole(rs));
                     return user;
