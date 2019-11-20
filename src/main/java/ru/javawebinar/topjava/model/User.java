@@ -151,19 +151,22 @@ public class User extends AbstractNamedEntity {
         return this;
     }
 
-    public void addRole(Role... roles) {
+    public User addRole(Role... roles) {
         if (CollectionUtils.isEmpty(this.roles)) {
             this.roles = EnumSet.noneOf(Role.class);
         }
         this.roles.addAll(List.of(roles));
+        return this;
     }
 
-    public void removeRole(Role role) {
+    public User removeRole(Role role) {
         roles.remove(role);
+        return this;
     }
 
-    public void clearRoles() {
+    public User clearRoles() {
         roles.clear();
+        return this;
     }
 
     public List<Meal> getMeals() {

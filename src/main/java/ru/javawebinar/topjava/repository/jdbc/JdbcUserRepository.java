@@ -8,9 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.javawebinar.topjava.model.Role;
 import ru.javawebinar.topjava.model.User;
@@ -38,13 +36,13 @@ public class JdbcUserRepository implements UserRepository {
     private final SimpleJdbcInsert insertUser;
 
     @Autowired
-    public JdbcUserRepository(DataSourceTransactionManager transactionManager,
-                              NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
-        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
-        this.jdbcTemplate = new JdbcTemplate(transactionManager.getDataSource());
+    public JdbcUserRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.insertUser = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("users")
                 .usingGeneratedKeyColumns("id");
+
+        this.jdbcTemplate = jdbcTemplate;
+        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
     @Override
@@ -93,23 +91,20 @@ public class JdbcUserRepository implements UserRepository {
     }
 
     @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
     public User get(int id) {
         List<User> users = jdbcTemplate.query("SELECT * FROM users WHERE id=?", ROW_MAPPER, id);
         User user = DataAccessUtils.singleResult(users);
-        return getUserWithRoles(id, user, jdbcTemplate);
+        return user == null ? null : getUserWithRoles(id, user, jdbcTemplate);
     }
 
     @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
     public User getByEmail(String email) {
         List<User> users = jdbcTemplate.query("SELECT * FROM users WHERE email=?", ROW_MAPPER, email);
         User user = DataAccessUtils.singleResult(users);
-        return getUserWithRoles(user.getId(), user, jdbcTemplate);
+        return user == null ? null : getUserWithRoles(user.getId(), user, jdbcTemplate);
     }
 
     @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
     public List<User> getAll() {
         Map<Integer, User> userMap = new LinkedHashMap<>();
 
@@ -119,17 +114,16 @@ public class JdbcUserRepository implements UserRepository {
                         "    ON u.id=ur.user_id" +
                         " ORDER BY name, email",
                 rs -> {
+                    int rowNumber = 0;
                     do {
-                        User user = new User(
-                                rs.getInt("id"),
-                                rs.getString("name"),
-                                rs.getString("email"),
-                                rs.getString("password"),
-                                rs.getInt("calories_per_day"),
-                                rs.getBoolean("enabled"),
-                                rs.getTimestamp("registered"),
-                                null);
-                        userMap.computeIfAbsent(user.getId(), id -> user).addRole(getRole(rs));
+                        User user = ROW_MAPPER.mapRow(rs, rowNumber++);
+                        userMap.computeIfAbsent(user.getId(), id -> user);
+                        Role role = getRole(rs);
+                        if (role != null) {
+                            userMap.get(user.getId()).addRole(role);
+                        } else {
+                            userMap.get(user.getId()).setRoles(Collections.emptySet());
+                        }
                     } while (rs.next());
                 });
         return new ArrayList<>(userMap.values());
@@ -143,12 +137,11 @@ public class JdbcUserRepository implements UserRepository {
                     user.addRole(getRole(rs));
                     return user;
                 }, id);
-        return user == null ? null :
-                user.getRoles() != null ? user :
-                        user.setRoles(Collections.emptySet());
+        return user.getRoles() != null ? user : user.setRoles(Collections.emptySet());
     }
 
     private static Role getRole(ResultSet rs) throws SQLException {
-        return Role.valueOf(rs.getString("role"));
+        final String role = rs.getString("role");
+        return role == null ? null : Role.valueOf(role);
     }
 }
