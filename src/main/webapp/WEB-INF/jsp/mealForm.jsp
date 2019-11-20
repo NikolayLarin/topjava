@@ -19,7 +19,7 @@
     <h3>${action == 'create' ? create : update}</h3>
 
     <jsp:useBean id="meal" type="ru.javawebinar.topjava.model.Meal" scope="request"/>
-    <form method="post" action="meals/${action}">
+    <form method="post" action="meals/">
         <input type="hidden" name="id" value="${meal.id}">
         <dl>
             <dt><spring:message code="meal.dateTime"/>:</dt>

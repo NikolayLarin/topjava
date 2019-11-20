@@ -2,6 +2,7 @@ package ru.javawebinar.topjava.web.meal;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -60,17 +61,16 @@ public class JspMealController extends AbstractMealController {
         return "mealForm";
     }
 
-    @PostMapping("/{action}")
-    public String create(@PathVariable String action,
-                         @RequestParam("dateTime") String dateTime,
+    @PostMapping("/")
+    public String create(@RequestParam("dateTime") String dateTime,
                          @RequestParam("description") String description,
                          @RequestParam("calories") String calories,
                          @RequestParam("id") String id) {
         final Meal meal = new Meal(
                 LocalDateTime.parse(dateTime), description, getParsed(calories));
-        if (action.equals("create")) {
+        if (StringUtils.isEmpty(id)) {
             super.create(meal);
-        } else if (action.equals("update")) {
+        } else {
             super.update(meal, getParsed(id));
         }
         return "redirect:/meals";
