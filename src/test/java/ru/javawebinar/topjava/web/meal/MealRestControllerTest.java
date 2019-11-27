@@ -62,6 +62,7 @@ class MealRestControllerTest extends AbstractControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.delete(REST_URL + MEAL1_ID))
                 .andDo(print())
                 .andExpect(status().isNoContent());
+
         assertThrows(NotFoundException.class, () -> mealService.get(MEAL1_ID, SecurityUtil.authUserId()));
     }
 
@@ -94,37 +95,33 @@ class MealRestControllerTest extends AbstractControllerTest {
     @Test
     void getBetween() throws Exception {
         List<MealTo> tos = MealsUtil.getTos(List.of(MEAL7, MEAL6, MEAL5), SecurityUtil.authUserCaloriesPerDay());
-        String startDate = "2015-05-31";
-        String startTime = "07:00";
-        String endDate = "2015-05-31";
-        String endTime = "23:00";
-        mockMvc.perform(MockMvcRequestBuilders.get(REST_URL + "/filter?" +
-                "startDate=" + startDate + "&startTime=" + startTime +
-                "&endDate=" + endDate + "&endTime=" + endTime))
+        mockMvc.perform(MockMvcRequestBuilders.get(REST_URL + "/filter")
+                .param("startDate", "2015-05-31")
+                .param("startTime", "07:00")
+                .param("endDate", "2015-05-31")
+                .param("endTime", "23:00"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(contentJson(tos));
-/*
-        String startDateTime = "2015-05-31T07:00";
-        String endDateTime = "2015-05-31T23:00";
-        mockMvc.perform(MockMvcRequestBuilders.get(REST_URL + "/filter?" +
-                "startDateTime=" + startDateTime + "&endDateTime=" + endDateTime))
-                .andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(contentJson(tos));
-*/
     }
 
     @Test
     void getBetweenWithEmptyFields() throws Exception {
         List<MealTo> tos = MealsUtil.getTos(List.copyOf(MEALS), SecurityUtil.authUserCaloriesPerDay());
-        String startDate = "";
-        String startTime = "";
-        String endDate = "";
-        String endTime = "";
-        mockMvc.perform(MockMvcRequestBuilders.get(REST_URL + "/filter?" +
-                "startDate=" + startDate + "&startTime=" + startTime +
-                "&endDate=" + endDate + "&endTime=" + endTime))
+        mockMvc.perform(MockMvcRequestBuilders.get(REST_URL + "/filter")
+                .param("startDate", "")
+                .param("startTime", "")
+                .param("endDate", "")
+                .param("endTime", ""))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(contentJson(tos));
+    }
+
+    @Test
+    void getBetweenWithNullFields() throws Exception {
+        List<MealTo> tos = MealsUtil.getTos(List.copyOf(MEALS), SecurityUtil.authUserCaloriesPerDay());
+        mockMvc.perform(MockMvcRequestBuilders.get(REST_URL + "/filter"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(contentJson(tos));

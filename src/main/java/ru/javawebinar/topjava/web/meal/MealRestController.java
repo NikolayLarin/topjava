@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -18,10 +17,9 @@ import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.to.MealTo;
 
 import java.net.URI;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
-
-import static ru.javawebinar.topjava.util.DateTimeUtil.parseLocalDate;
-import static ru.javawebinar.topjava.util.DateTimeUtil.parseLocalTime;
 
 @RestController
 @RequestMapping(value = MealRestController.REST_URL, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -63,21 +61,17 @@ public class MealRestController extends AbstractMealController {
         return ResponseEntity.created(uriOfNewResource).body(created);
     }
 
-    @GetMapping("/filter")
-    public List<MealTo> getBetween(@RequestParam String startDate, @RequestParam String startTime,
-                                   @RequestParam String endDate, @RequestParam String endTime) {
-        return super.getBetween(
-                parseLocalDate(startDate), parseLocalTime(startTime),
-                parseLocalDate(endDate), parseLocalTime(endTime));
-    }
 /*
-    @GetMapping("/filter")
-    public List<MealTo> getBetween(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDateTime,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDateTime) {
-        return super.getBetween(
-                startDateTime.toLocalDate(), startDateTime.toLocalTime(),
-                endDateTime.toLocalDate(), endDateTime.toLocalTime());
-    }
+    Converters/Formatters:
+    https://docs.spring.io/spring/docs/current/spring-framework-reference/core.html#core-convert
+    https://docs.spring.io/spring/docs/current/spring-framework-reference/core.html#format
+
+    Alternative to Converters/Formatters:
+    https://stackoverflow.com/questions/30715579/custom-spring-annotation-for-request-parameters
 */
+    @GetMapping("/filter")
+    public List<MealTo> getBetween(LocalDate startDate, LocalTime startTime,
+                                   LocalDate endDate, LocalTime endTime) {
+        return super.getBetween(startDate, startTime, endDate, endTime);
+    }
 }

@@ -46,13 +46,6 @@ class RootControllerTest extends AbstractControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("meals"))
                 .andExpect(forwardedUrl("/WEB-INF/jsp/meals.jsp"))
-                .andExpect(model().attribute("meals",
-                        new AssertionMatcher<List<MealTo>>() {
-                            @Override
-                            public void assertion(List<MealTo> actual) throws AssertionError {
-                                MealTestData.assertMatch(actual, tos);
-                            }
-                        }))
                 .andExpect(model().attribute("meals", tos));
     }
 }
