@@ -1,0 +1,62 @@
+# For a quick start check out our HTTP Requests collection (Tools|HTTP Client|Open HTTP Requests Collection) or
+# paste cURL into the file and request will be converted to HTTP Request format.
+#
+# Following HTTP Request Live Templates are available:
+# * 'gtrp' and 'gtr' create a GET request with or without query parameters;
+# * 'ptr' and 'ptrp' create a POST request with a simple or parameter-like body;
+# * 'mptr' and 'fptr' create a POST request to submit a form with a text or file field (multipart/form-data);
+
+#GetAll
+GET http://localhost:8080/topjava/rest/meals
+
+###
+
+#Create
+POST http://localhost:8080/topjava/rest/meals
+Content-Type: application/json
+
+{
+  "dateTime": "2015-05-31T23:01:00",
+  "description": "Поздний ужин",
+  "calories": 5000
+}
+
+###
+
+#Get
+GET http://localhost:8080/topjava/rest/meals/100011
+
+###
+
+#Update
+PUT http://localhost:8080/topjava/rest/meals/100011
+Content-Type: application/json
+
+{
+  "dateTime": "2015-05-31T23:01:00",
+  "description": "Поздний ужин изменённый",
+  "calories": 5000
+}
+
+###
+
+#Delete
+DELETE http://localhost:8080/topjava/rest/meals/100011
+
+###
+
+
+#GetBetween
+GET http://localhost:8080/topjava/rest/meals/filter/?startDate=2015-05-31&startTime=07:00&endDate=2015-05-31&endTime=23:00
+
+###
+
+#getBetweenWithEmptyFields
+GET http://localhost:8080/topjava/rest/meals/filter/?startDate=&startTime=&endDate=&endTime=
+
+###
+
+#getBetweenWithNullFields
+GET http://localhost:8080/topjava/rest/meals/filter
+
+###
