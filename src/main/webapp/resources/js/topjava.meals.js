@@ -1,27 +1,21 @@
-let ajaxUrlUsers = "ajax/admin/users/";
+let ajaxUrlMeals = "ajax/profile/meals/";
 
 // $(document).ready(function () {
 $(function () {
     makeEditable({
-            ajaxUrl: ajaxUrlUsers,
+            ajaxUrl: ajaxUrlMeals,
             datatableApi: $("#datatable").DataTable({
                 "paging": false,
                 "info": true,
                 "columns": [
                     {
-                        "data": "name"
+                        "data": "dateTime"
                     },
                     {
-                        "data": "email"
+                        "data": "description"
                     },
                     {
-                        "data": "roles"
-                    },
-                    {
-                        "data": "enabled"
-                    },
-                    {
-                        "data": "registered"
+                        "data": "calories"
                     },
                     {
                         "defaultContent": "Edit",
@@ -35,10 +29,29 @@ $(function () {
                 "order": [
                     [
                         0,
-                        "asc"
+                        "desc"
                     ]
                 ]
             })
         }
     );
 });
+
+function drawFiltered() {
+    $.ajax({
+        type: "GET",
+        url: ajaxUrlMeals + "filter",
+        // data: document.getElementById("filterForm").serialize()
+        data: $("#filterForm").serialize()
+    }).done(function (data) {
+        context.datatableApi.clear().rows.add(data).draw();
+        successNoty("Filtered")
+    });
+}
+
+function clearFilters() {
+    // document.getElementById("filterForm").reset();
+    $("#filterForm")[0].reset();
+    updateTable();
+    successNoty("Filters are cleaned");
+}

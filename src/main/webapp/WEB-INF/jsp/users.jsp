@@ -13,10 +13,12 @@
 <div class="jumbotron pt-4">
     <div class="container">
         <h3 class="text-center"><spring:message code="user.title"/></h3>
+
         <button class="btn btn-primary" onclick="add()">
-            <span class="fa fa-plus"></span>
+            <span class="fa fa-plus-circle"></span>
             <spring:message code="common.add"/>
         </button>
+
         <table class="table table-striped" id="datatable">
             <thead>
             <tr>
@@ -29,6 +31,7 @@
                 <th></th>
             </tr>
             </thead>
+            <jsp:useBean id="users" scope="request" type="java.util.List"/>
             <c:forEach items="${users}" var="user">
                 <jsp:useBean id="user" type="ru.javawebinar.topjava.model.User"/>
                 <tr>
@@ -38,7 +41,7 @@
                     <td><input type="checkbox" <c:if test="${user.enabled}">checked</c:if> id="${user.id}"/></td>
                     <td><fmt:formatDate value="${user.registered}" pattern="dd-MMMM-yyyy"/></td>
                     <td><a><span class="fa fa-pencil"></span></a></td>
-                    <td><a class="delete" id="${user.id}"><span class="fa fa-remove"></span></a></td>
+                    <td><a class="delete" onclick="deleteRow(${user.id})"><span class="fa fa-remove"></span></a></td>
                 </tr>
             </c:forEach>
         </table>

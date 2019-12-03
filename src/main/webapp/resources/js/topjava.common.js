@@ -1,13 +1,15 @@
-var context, form;
+let context, form;
 
 function makeEditable(ctx) {
     context = ctx;
     form = $('#detailsForm');
-    $(".delete").click(function () {
-        if (confirm('Are you sure?')) {
-            deleteRow($(this).attr("id"));
-        }
-    });
+    /*
+        $(".delete").click(function () {
+            if (confirm('Are you sure?')) {
+                deleteRow($(this).attr("id"));
+            }
+        });
+    */
 
     $(document).ajaxError(function (event, jqXHR, options, jsExc) {
         failNoty(jqXHR);
@@ -23,13 +25,15 @@ function add() {
 }
 
 function deleteRow(id) {
-    $.ajax({
-        url: context.ajaxUrl + id,
-        type: "DELETE"
-    }).done(function () {
-        updateTable();
-        successNoty("Deleted");
-    });
+    if (confirm("Are you sure?")) {
+        $.ajax({
+            url: context.ajaxUrl + id,
+            type: "DELETE"
+        }).done(function () {
+            updateTable();
+            successNoty("Deleted");
+        });
+    }
 }
 
 function updateTable() {
@@ -45,8 +49,16 @@ function save() {
         data: form.serialize()
     }).done(function () {
         $("#editRow").modal("hide");
-        updateTable();
         successNoty("Saved");
+
+        switch (context.ajaxUrl) {
+            case "ajax/profile/meals/":
+                drawFiltered();
+                break;
+            case "ajax/admin/users/":
+                updateTable();
+                break;
+        }
     });
 }
 
@@ -64,8 +76,8 @@ function successNoty(text) {
     new Noty({
         text: "<span class='fa fa-lg fa-check'></span> &nbsp;" + text,
         type: 'success',
-        layout: "bottomRight",
-        timeout: 1000
+        layout: "bottomLeft",
+        timeout: 1500
     }).show();
 }
 
@@ -74,6 +86,7 @@ function failNoty(jqXHR) {
     failedNote = new Noty({
         text: "<span class='fa fa-lg fa-exclamation-circle'></span> &nbsp;Error status: " + jqXHR.status,
         type: "error",
-        layout: "bottomRight"
+        layout: "bottomLeft",
+        timeout: 1500
     }).show();
 }
