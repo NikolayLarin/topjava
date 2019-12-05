@@ -48,4 +48,9 @@ public abstract class AbstractUserController {
         log.info("getByEmail {}", email);
         return service.getByEmail(email);
     }
+
+    public void setEnabled(int id, boolean enabled) {
+        log.info("set enabled={} for user with id={}", enabled, id);
+        service.setEnabled(id, enabled);
+    }
 }

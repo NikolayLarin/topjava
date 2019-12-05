@@ -32,7 +32,8 @@ $(function () {
                         "desc"
                     ]
                 ]
-            })
+            }),
+            updateTable: drawFiltered
         }
     );
 });
@@ -44,8 +45,8 @@ function drawFiltered() {
         // data: document.getElementById("filterForm").serialize()
         data: $("#filterForm").serialize()
     }).done(function (data) {
-        context.datatableApi.clear().rows.add(data).draw();
-        successNoty("Filtered")
+        updateTableWithData(data);
+        successNoty("Filtering enabled")
     });
 }
 
@@ -53,5 +54,5 @@ function clearFilters() {
     // document.getElementById("filterForm").reset();
     $("#filterForm")[0].reset();
     updateTable();
-    successNoty("Filters are cleaned");
+    successNoty("Filtering disabled");
 }

@@ -38,7 +38,22 @@ $(function () {
                         "asc"
                     ]
                 ]
-            })
+            }),
+            updateTable: function () {
+                $.get(context.ajaxUrl, updateTableWithData);
+            }
         }
     );
 });
+
+function setEnable(id, name) {
+    let isEnabled = !!($("#checkbox-for-user-" + id).prop("checked"));
+    $.ajax({
+        type: "POST",
+        url: ajaxUrlUsers + "status",
+        data: {id: id, enabled: isEnabled}
+    }).done(function () {
+        updateTable();
+        successNoty("User '" + name + "' is " + (isEnabled === true ? "enabled" : "disabled"));
+    });
+}

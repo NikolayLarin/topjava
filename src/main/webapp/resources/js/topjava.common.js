@@ -3,13 +3,6 @@ let context, form;
 function makeEditable(ctx) {
     context = ctx;
     form = $('#detailsForm');
-    /*
-        $(".delete").click(function () {
-            if (confirm('Are you sure?')) {
-                deleteRow($(this).attr("id"));
-            }
-        });
-    */
 
     $(document).ajaxError(function (event, jqXHR, options, jsExc) {
         failNoty(jqXHR);
@@ -30,7 +23,8 @@ function deleteRow(id) {
             url: context.ajaxUrl + id,
             type: "DELETE"
         }).done(function () {
-            updateTable();
+            // updateTable();
+            context.updateTable();
             successNoty("Deleted");
         });
     }
@@ -42,6 +36,10 @@ function updateTable() {
     });
 }
 
+function updateTableWithData(data) {
+    context.datatableApi.clear().rows.add(data).draw();
+}
+
 function save() {
     $.ajax({
         type: "POST",
@@ -49,16 +47,8 @@ function save() {
         data: form.serialize()
     }).done(function () {
         $("#editRow").modal("hide");
+        context.updateTable();
         successNoty("Saved");
-
-        switch (context.ajaxUrl) {
-            case "ajax/profile/meals/":
-                drawFiltered();
-                break;
-            case "ajax/admin/users/":
-                updateTable();
-                break;
-        }
     });
 }
 

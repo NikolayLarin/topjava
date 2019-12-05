@@ -14,14 +14,14 @@
 
         <form id="filterForm">
             <div class="form-row">
-                <div class="col-2.5">
+                <div class="col-3">
                     <label for="startDate">
                         <b><spring:message code="meal.startDate"/>:</b>
                     </label>
                     <input type="date" class="form-control" id="startDate"
                            name="startDate" value="${param.startDate}">
                 </div>
-                <div class="col-2.5">
+                <div class="col-3">
                     <label for="endDate">
                         <b><spring:message code="meal.endDate"/>:</b>
                     </label>
@@ -46,7 +46,6 @@
         </form>
 
         <div>
-            <br>
             <button class="btn btn-danger left" onclick="clearFilters()">
                 <span class="fa fa-close"></span>
                 <spring:message code="common.cancel"/>
@@ -57,40 +56,42 @@
             </button>
         </div>
     </div>
-    <hr>
 
-    <button class="btn btn-primary" onclick="add()">
-        <span class="fa fa-plus-circle"></span>
-        <spring:message code="meal.add"/>
-    </button>
+    <div class="container">
+        <hr>
+        <button class="btn btn-primary" onclick="add()">
+            <span class="fa fa-plus-circle"></span>
+            <spring:message code="meal.add"/>
+        </button>
 
-    <table class="table table-striped" id="datatable">
-        <thead>
-        <tr>
-            <th><spring:message code="meal.dateTime"/></th>
-            <th><spring:message code="meal.description"/></th>
-            <th><spring:message code="meal.calories"/></th>
-            <th></th>
-            <th></th>
-        </tr>
-        </thead>
-        <jsp:useBean id="meals" scope="request" type="java.util.List"/>
-        <c:forEach items="${meals}" var="meal">
-            <jsp:useBean id="meal" scope="page" type="ru.javawebinar.topjava.to.MealTo"/>
-            <tr data-mealExcess="${meal.excess}">
-                <td>
-                        <%--${meal.dateTime.toLocalDate()} ${meal.dateTime.toLocalTime()}--%>
-                        <%--<%=TimeUtil.toString(meal.getDateTime())%>--%>
-                        <%--${fn:replace(meal.dateTime, 'T', ' ')}--%>
-                        ${fn:formatDateTime(meal.dateTime)}
-                </td>
-                <td>${meal.description}</td>
-                <td>${meal.calories}</td>
-                <td><a><span class="fa fa-pencil"></span></a></td>
-                <td><a class="delete" onclick="deleteRow(${meal.id})"><span class="fa fa-remove"></span></a></td>
+        <table class="table table-striped" id="datatable">
+            <thead>
+            <tr>
+                <th><spring:message code="meal.dateTime"/></th>
+                <th><spring:message code="meal.description"/></th>
+                <th><spring:message code="meal.calories"/></th>
+                <th></th>
+                <th></th>
             </tr>
-        </c:forEach>
-    </table>
+            </thead>
+            <jsp:useBean id="meals" scope="request" type="java.util.List"/>
+            <c:forEach items="${meals}" var="meal">
+                <jsp:useBean id="meal" scope="page" type="ru.javawebinar.topjava.to.MealTo"/>
+                <tr data-mealExcess="${meal.excess}">
+                    <td>
+                            <%--${meal.dateTime.toLocalDate()} ${meal.dateTime.toLocalTime()}--%>
+                            <%--<%=TimeUtil.toString(meal.getDateTime())%>--%>
+                            <%--${fn:replace(meal.dateTime, 'T', ' ')}--%>
+                            ${fn:formatDateTime(meal.dateTime)}
+                    </td>
+                    <td>${meal.description}</td>
+                    <td>${meal.calories}</td>
+                    <td><a><span class="fa fa-pencil"></span></a></td>
+                    <td><a class="delete" onclick="deleteRow(${meal.id})"><span class="fa fa-remove"></span></a></td>
+                </tr>
+            </c:forEach>
+        </table>
+    </div>
 </div>
 
 <div class="modal fade" tabindex="-1" id="editRow">
