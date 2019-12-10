@@ -1,18 +1,34 @@
 package ru.javawebinar.topjava.to;
 
+import org.hibernate.validator.constraints.Range;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.beans.ConstructorProperties;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-public class MealTo extends BaseTo {
+public class MealTo extends BaseTo implements Serializable {
 
-    private final LocalDateTime dateTime;
+    private static final long serialVersionUID = 20191209L;
 
-    private final String description;
+    @NotNull
+    private LocalDateTime dateTime;
 
-    private final int calories;
+    @NotBlank
+    @Size(min = 2, max = 120)
+    private String description;
 
-    private final boolean excess;
+    @Range(min = 10, max = 5000)
+    private int calories;
+
+    private boolean excess;
+
+    public MealTo() {
+    }
 
     @ConstructorProperties({"id", "dateTime", "description", "calories", "excess"})
     public MealTo(Integer id, LocalDateTime dateTime, String description, int calories, boolean excess) {
@@ -27,16 +43,32 @@ public class MealTo extends BaseTo {
         return dateTime;
     }
 
+    public void setDateTime(LocalDateTime dateTime) {
+        this.dateTime = dateTime;
+    }
+
     public String getDescription() {
         return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public int getCalories() {
         return calories;
     }
 
+    public void setCalories(int calories) {
+        this.calories = calories;
+    }
+
     public boolean isExcess() {
         return excess;
+    }
+
+    public void setExcess(boolean excess) {
+        this.excess = excess;
     }
 
     @Override
