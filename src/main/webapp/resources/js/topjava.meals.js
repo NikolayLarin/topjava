@@ -67,4 +67,8 @@ $(function () {
         }),
         updateTable: updateFilteredTable
     });
+    $.datetimepicker.setLocale(codeLocale);
+    $('#dateTime').datetimepicker({
+        format: 'Y-m-d H:i'
+    });
 });
