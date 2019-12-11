@@ -9,7 +9,8 @@
 
 <script type="text/javascript" src="resources/js/topjava.common.js" defer></script>
 <script type="text/javascript" src="resources/js/topjava.meals.js" defer></script>
-<script type="text/javascript" src="webjars/datetimepicker/2.5.20/build/jquery.datetimepicker.full.min.js" defer></script>
+<script type="text/javascript" src="webjars/datetimepicker/2.5.20/build/jquery.datetimepicker.full.min.js"
+        defer></script>
 
 <jsp:include page="fragments/bodyHeader.jsp"/>
 
@@ -22,20 +23,20 @@
                 <form id="filter">
                     <div class="row">
                         <div class="col-3">
-                            <label for="startDate"><spring:message code="meal.startDate"/></label>
-                            <input class="form-control" name="startDate" id="startDate">
+                            <label for="startDate"><b><spring:message code="meal.startDate"/></b></label>
+                            <input class="form-control" name="startDate" id="startDate" autocomplete="off">
                         </div>
                         <div class="col-3">
-                            <label for="endDate"><spring:message code="meal.endDate"/></label>
-                            <input class="form-control" type="date" name="endDate" id="endDate">
+                            <label for="endDate"><b><spring:message code="meal.endDate"/></b></label>
+                            <input class="form-control" name="endDate" id="endDate" autocomplete="off">
                         </div>
                         <div class="offset-2 col-2">
-                            <label for="startTime"><spring:message code="meal.startTime"/></label>
-                            <input class="form-control" type="time" name="startTime" id="startTime">
+                            <label for="startTime"><b><spring:message code="meal.startTime"/></b></label>
+                            <input class="form-control" name="startTime" id="startTime" autocomplete="off">
                         </div>
                         <div class="col-2">
-                            <label for="endTime"><spring:message code="meal.endTime"/></label>
-                            <input class="form-control" type="time" name="endTime" id="endTime">
+                            <label for="endTime"><b><spring:message code="meal.endTime"/></b></label>
+                            <input class="form-control" name="endTime" id="endTime" autocomplete="off">
                         </div>
                     </div>
                 </form>
@@ -84,8 +85,8 @@
 
                     <div class="form-group">
                         <label for="dateTime" class="col-form-label"><spring:message code="meal.dateTime"/></label>
-                        <input <%--type="datetime-local"--%> class="form-control" id="dateTime" name="dateTime"
-                                                             placeholder="<spring:message code="meal.dateTime"/>">
+                        <input class="form-control" id="dateTime" name="dateTime"
+                               autocomplete="off" placeholder="<spring:message code="meal.dateTime"/>">
                     </div>
 
                     <div class="form-group">

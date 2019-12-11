@@ -39,10 +39,11 @@ public class DateTimeFormatters {
     }
 
     public static class LocalDateTimeFormatter implements Formatter<LocalDateTime> {
+        private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
         @Override
         public LocalDateTime parse(String text, Locale locale) {
-            return LocalDateTime.parse(text.replace(" ", "T"));
+            return LocalDateTime.parse(text, DATE_TIME_FORMATTER);
         }
 
         @Override
