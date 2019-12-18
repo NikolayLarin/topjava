@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.to.UserTo;
-import ru.javawebinar.topjava.util.EmailValidator;
+import ru.javawebinar.topjava.util.FormEmailValidator;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -25,11 +25,11 @@ import java.util.List;
 public class AdminUIController extends AbstractUserController {
 
     @Autowired
-    EmailValidator emailValidator;
+    FormEmailValidator formEmailValidator;
 
     @InitBinder
     protected void initBinder(WebDataBinder binder) {
-        binder.setValidator(emailValidator);
+        binder.addValidators(formEmailValidator);
     }
 
     @Override

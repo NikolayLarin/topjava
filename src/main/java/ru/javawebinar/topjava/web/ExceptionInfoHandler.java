@@ -17,6 +17,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import ru.javawebinar.topjava.util.ValidationUtil;
 import ru.javawebinar.topjava.util.exception.ErrorInfo;
 import ru.javawebinar.topjava.util.exception.ErrorType;
+import ru.javawebinar.topjava.util.exception.ExistException;
 import ru.javawebinar.topjava.util.exception.IllegalRequestDataException;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
@@ -40,8 +41,8 @@ public class ExceptionInfoHandler {
     }
 
     @ResponseStatus(value = HttpStatus.CONFLICT)  // 409
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    public ErrorInfo conflict(HttpServletRequest req, DataIntegrityViolationException e) {
+    @ExceptionHandler({DataIntegrityViolationException.class, ExistException.class})
+    public ErrorInfo conflict(HttpServletRequest req, Exception e) {
         return logAndGetErrorInfo(req, e, true, DATA_ERROR);
     }
 
@@ -71,7 +72,8 @@ public class ExceptionInfoHandler {
         } else {
             log.warn("{} at request  {}: {}", errorType, req.getRequestURL(), rootCause.toString());
         }
-        return new ErrorInfo(req.getRequestURL(), errorType, rootCause.toString());
+        return new ErrorInfo(req.getRequestURL(), errorType, e.getLocalizedMessage());
+//        return new ErrorInfo(req.getRequestURL(), errorType, rootCause.toString());
     }
 
     private static ErrorInfo getErrorInfo(HttpServletRequest req, BindException e) {

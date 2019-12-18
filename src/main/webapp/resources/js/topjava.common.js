@@ -99,8 +99,8 @@ function failNoty(jqXHR) {
     failedNote = new Noty({
         text: "<span class='fa fa-lg fa-exclamation-circle'></span> &nbsp;"
             + i18n["common.errorStatus"] + ": " + jqXHR.status + "<br>"
-            + errorInfo.type + "<br><br>"
-            + errorInfo.detail,
+            + errorInfo.type + "<br>"
+            + errorInfo.detail.join("<br>"),
         type: "error",
         layout: "bottomRight"
     }).show();
