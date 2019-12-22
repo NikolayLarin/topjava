@@ -1,12 +1,14 @@
 package ru.javawebinar.topjava.util;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
-import ru.javawebinar.topjava.util.exception.ExistException;
 import ru.javawebinar.topjava.web.SecurityUtil;
 
 import java.time.LocalDateTime;
@@ -18,6 +20,9 @@ public class MealDateTimeValidator implements Validator {
 
     @Autowired
     private MealRepository mealRepository;
+
+    @Autowired
+    private MessageSource messageSource;
 
     @Override
     public boolean supports(Class<?> clazz) {
@@ -37,7 +42,8 @@ public class MealDateTimeValidator implements Validator {
                 meals.put(ldt.toString(), ldt);
             }
             if (meals.get(mealLtd.toString()) != null) {
-                throw new ExistException("You already have Meal at this dateTime");
+                throw new DataIntegrityViolationException(messageSource.getMessage(
+                        "exception.duplicate_dateTime", null, LocaleContextHolder.getLocale()));
             }
         }
     }

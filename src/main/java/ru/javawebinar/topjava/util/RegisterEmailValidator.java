@@ -24,7 +24,7 @@ public class RegisterEmailValidator implements Validator {
         UserTo userTo = (UserTo) target;
         User existing = userRepository.getByEmail(userTo.getEmail());
         if (existing != null && userTo.getId() == null) {
-            errors.rejectValue("email", "user.email.exists");
+            errors.rejectValue("email", "exception.duplicate_email");
         }
     }
 }

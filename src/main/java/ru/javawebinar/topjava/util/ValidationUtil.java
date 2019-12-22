@@ -10,9 +10,7 @@ import javax.validation.ConstraintViolationException;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class ValidationUtil {
 
@@ -81,11 +79,11 @@ public class ValidationUtil {
         }
     }
 
-    public static List<String> getErrorResponse(BindingResult result) {
+    public static String[] getErrorResponse(BindingResult result) {
         return result.getFieldErrors()
                 .stream()
-                .map(fe -> String.format("[%s] %s", fe.getField(), fe.getDefaultMessage()))
+                .map(fe -> String.format("\"%s\" %s", fe.getField(), fe.getDefaultMessage()))
                 .sorted()
-                .collect(Collectors.toList());
+                .toArray(String[]::new);
     }
 }
